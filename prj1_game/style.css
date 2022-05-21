@@ -1,0 +1,18 @@
+/* :root{
+
+}
+ */
+body{
+    width: 100vw;
+    height: 100vh;
+    margin: 0;
+    display:flex;
+    justify-content: center;
+    align-items: center;
+}
+canvas{
+    width: 90vw;
+    height:90vh;
+    /*background: grey;*/
+    border:black 10px solid;
+}
