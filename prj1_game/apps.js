@@ -67,12 +67,11 @@ class Spawn {
     movement() {
         //console.log(this.x,this.dX,this.y,this.dY);
         //check x coordinates for next move. If outside of board boundry, flip the sign of dX to make it go the other way next tick.
-        ((this.x + this.dX + this.radius) <= myCanvas.width && (this.x + this.dX) >= 0) ? null : this.dX *= (-1);
+        (this.x + this.dX + this.radius) <= myCanvas.width && (this.x + this.dX) >= 0 ? null : this.dX *= (-1)
         this.x += this.dX;
         //check y coords
-        ((this.y + this.dY + this.radius) <= myCanvas.height && (this.y + this.dY) >= 0) ? null : this.dY *= (-1);
+        (this.y + this.dY + this.radius) <= myCanvas.height && (this.y + this.dY) >= 0 ? null : this.dY *= (-1)
         this.y += this.dY;
-        return null
     }
     render() {
         pencil.fillStyle = this.color
@@ -117,6 +116,11 @@ function resetGame(){
 
 }
 
+function updateScoreboard (){
+    score+= spawnList.length/50
+    scoreBoard.textContent = `Score: ${Math.floor(score)}`
+}
+
 //Function to advance the game by one 'tick' each 60ms.
 let spawnTimer = 0
 function gameTick()  {
@@ -128,9 +132,10 @@ function gameTick()  {
     player.movement()
     player.render()
     checkCollisions()
+    updateScoreboard()
     //spawn stuff
     
-    generateSpawn(150, 5)
+    generateSpawn(50, 5)
     for(let spawn of spawnList){
         spawn.movement()
         spawn.render()
@@ -164,6 +169,7 @@ function movementHandler(e) {
 document.addEventListener('keydown', movementHandler)
 let player = new Player()
 let spawnList = []
+let scoreBoard = document.getElementById('scoreboard')
 let score = 0
 /* let spawn = new Spawn(20, 1, 1)
 let spawn2 = new Spawn(20, 1.1, 1.1)

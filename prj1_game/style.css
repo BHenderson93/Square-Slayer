@@ -10,9 +10,14 @@ body{
     justify-content: center;
     align-items: center;
 }
+
 canvas{
-    width: 90vw;
+    width: 75vw;
     height:90vh;
     /*background: grey;*/
     border:black 10px solid;
+}
+#scoreboard-container{
+    width:20vw;
+    height: 90vh;
 }
