@@ -7,20 +7,6 @@ let pencil = myCanvas.getContext('2d')
 const boardOrigin = { x: myCanvas.width / 2, y: myCanvas.height / 2 }
 const gameScaler = Math.min(myCanvas.width, myCanvas.height)
 
-//Draw outer border
-function drawOuterEdge() {
-
-}
-//Draw the center circle of the game board, which limits Player movement
-function drawCage() {
-    let radius = gameScaler
-    pencil.beginPath()
-    pencil.rect(boardOrigin.x, boardOrigin.y, radius, 0, 2 * Math.PI)
-    //pencil.stroke()
-    pencil.fill()
-}
-drawCage()
-
 //Class specifics for Player
 class Player {
 
@@ -72,6 +58,7 @@ class Player {
 }
 
 //Class specifics for objects spawned into the game board that bounce around and damage Player on contact.
+let spawnList = []
 class Spawn {
     constructor(radius, dX, dY) {
         this.radius = radius
@@ -132,9 +119,17 @@ function checkCollisions() {
 
 //function to reset the game
 function resetGame(){
-
+    clearInterval(gameInterval)
+    score = 0
+    updateScoreboard()
+    spawnList = [] 
+    gameInterval = setInterval(gameTick, 20)
+    
 }
 
+//function to update scoreboard and track current score
+let score = 0
+let scoreBoard = document.getElementById('scoreboard')
 function updateScoreboard (){
     score+= spawnList.length/50
     scoreBoard.textContent = `Score: ${Math.floor(score)}`
@@ -143,17 +138,14 @@ function updateScoreboard (){
 //Function to advance the game by one 'tick' each 60ms.
 let spawnTimer = 0
 function gameTick()  {
+    //clear board and redraw
     pencil.clearRect(0, 0, myCanvas.width, myCanvas.height)
-    //redraw static pieces of the gameboard
-    //check to see if the next move is within the bounds specified.
-
-    //let playerChain = (player.x**2)+(player.y**2)
     player.movement()
     player.render()
     checkCollisions()
     updateScoreboard()
+
     //spawn stuff
-    
     generateSpawn(50, 5 , 0.5)
     for(let spawn of spawnList){
         spawn.movement()
@@ -165,7 +157,7 @@ function gameTick()  {
 let nextMove = [0, 0 , 1]
 //array for tracking past movements so player can jump back in time
 let movePath = []
-//function to handle movement. Data is pushed by Player class.
+//function to handle movement. Data is pushed by Player class. Can handle other keypressse
 function movementHandlerKeyDown(e) {
     //console.log('keyboard move was ', e.key)
     switch (e.key) {
@@ -193,6 +185,10 @@ function movementHandlerKeyDown(e) {
             break
         case 'Shift':
             nextMove[2]=0.3
+            break
+        case 'r':
+            resetGame()
+            break
     }
 }
 
@@ -205,19 +201,13 @@ function movementHandlerKeyUp(e){
     }
 }
 
-
+//event listeners for keyboard presses
 document.addEventListener( 'keydown', movementHandlerKeyDown)
 document.addEventListener( 'keyup' , movementHandlerKeyUp)
+
+//resetGame also starts the game by setting the interval.
+
 let player = new Player()
-let spawnList = []
-let scoreBoard = document.getElementById('scoreboard')
-let score = 0
-/* let spawn = new Spawn(20, 1, 1)
-let spawn2 = new Spawn(20, 1.1, 1.1)
-spawn.render() */
 player.render()
 let gameInterval = setInterval(gameTick, 20)
-
-
-
 
