@@ -62,7 +62,7 @@ class Spawn {
         this.x = 0
         this.y = myCanvas.height / 2
         this.color = `rgb(${Math.floor(Math.random()*255)}, ${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)})`
-        console.log('My dX, dY is ' , this.dX,this.dY)
+        //console.log('My dX, dY is ' , this.dX,this.dY)
     }
     movement() {
         //console.log(this.x,this.dX,this.y,this.dY);
@@ -98,7 +98,23 @@ function generateSpawn(rate, spawnSize) {
     }
 }
 function movePieces() { }
-function checkCollisions() {//border and other pieces
+function checkCollisions() {
+    let playerCoords = [player.x, player.y]
+
+    for(let spawn of spawnList){
+        //spawn hit box dimensions include player dimensions so that only player x and y coordinates need to be calculated after.
+        let spawnHitBox = {xMin:spawn.x-player.radius, xMax:spawn.x + spawn.radius + player.radius, yMin:spawn.y-player.radius, yMax:spawn.y+spawn.radius +player.radius}
+        //console.log(spawnHitBox)
+        if (player.x < spawnHitBox.xMax && player.x > spawnHitBox.xMin && player.y > spawnHitBox.yMin && player.y < spawnHitBox.yMax){
+            console.log('Hit!')
+            clearInterval(gameInterval)
+        }
+    }
+}
+
+//function to reset the game
+function resetGame(){
+
 }
 
 //Function to advance the game by one 'tick' each 60ms.
@@ -111,7 +127,7 @@ function gameTick()  {
     //let playerChain = (player.x**2)+(player.y**2)
     player.movement()
     player.render()
-
+    checkCollisions()
     //spawn stuff
     
     generateSpawn(150, 5)
@@ -119,16 +135,12 @@ function gameTick()  {
         spawn.movement()
         spawn.render()
     }
-/*     spawn.movement()
-    spawn.render()
-    spawn2.movement()
-    spawn2.render() */
 }
 
 //store the last arrowkey press in the nextMove array. Use that for movement direction. Spacebar to clear.
 let nextMove = [0, 0]
 function movementHandler(e) {
-    console.log('keyboard move was ', e.key)
+    //console.log('keyboard move was ', e.key)
     switch (e.key) {
         case "ArrowUp":
             nextMove = ['y', -1]
@@ -157,7 +169,7 @@ let score = 0
 let spawn2 = new Spawn(20, 1.1, 1.1)
 spawn.render() */
 player.render()
-setInterval(gameTick, 20)
+let gameInterval = setInterval(gameTick, 20)
 
 
 
