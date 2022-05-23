@@ -13,14 +13,16 @@ class Player {
     //take in player attributes and construct object.
     constructor(color) {
         this.health = 10
-        this.speed = 10
+        this.speed = 3
         this.color = 'rgb(255,0,0)'
         this.x = boardOrigin.x
         this.y = boardOrigin.y
-        this.moveSpeed = 1
+        this.moveSpeed = .7
         this.radius = gameScaler * .01
         this.pathHistory = []
+        this.jumpBackDist = 350
     }
+
     movement(){
 
         //nextMove global variable stores X or Y axis and 1 or -1 by arrowkeys. Ex: down arrowkey = ['y', 1] for increase y axis to move player down.
@@ -28,13 +30,32 @@ class Player {
         let moveDist = nextMove[1]*nextMove[2]*this.moveSpeed
         moveAxis === 'x' ? (this.x + moveDist >= 0 && this.x + moveDist <= myCanvas.width ? this.x += moveDist : null) : null
         moveAxis === 'y' ? (this.y + moveDist >= 0 && this.y + moveDist <= myCanvas.height ? this.y += moveDist : null) : null
-        movePath.unshift([this.x,this.y])
-        movePath.length > 250 ? movePath.pop() : null
+        this.pathHistory.unshift([this.x,this.y])
+        this.pathHistory.length > this.jumpBackDist ? this.pathHistory.pop() : null
     }
 
     //draw the player on at the center of the board
     render() {
+        //console.log(this.pathHistory.length)
+        //path history shadow, drawn first so player will overlay if on top.
+        if(this.pathHistory.length > this.jumpBackDist/2){
+            //console.log('draw history')
+            pencil.beginPath()
+            this.jumpBackDist === this.pathHistory.length ? pencil.strokeStyle = 'darkgreen' : pencil.strokeStyle = 'blue'
+            pencil.arc(this.pathHistory[this.pathHistory.length-1][0], this.pathHistory[this.pathHistory.length-1][1], this.radius, 0, 2 * Math.PI)
+            pencil.fill()
 
+            //draw the pathHistory outline
+            let prevNode = [this.x, this.y]
+            for (let node of this.pathHistory){
+                pencil.moveTo(prevNode[0],prevNode[1])
+                this.jumpBackDist === this.pathHistory.length ? pencil.fillStyle = 'darkgreen' : pencil.fillStyle = 'blue'
+                pencil.lineTo(node[0],node[1])
+                pencil.stroke()
+                prevNode = node
+            }
+        }
+        
         //Central player
         pencil.beginPath()
         pencil.fillStyle = this.color
@@ -42,18 +63,18 @@ class Player {
         pencil.fill()
     }
 
-    jumpBack(timeDist){
+    jumpBack(){
         //pick the time distance in seconds back, adjust for game tick/second, and revert state.
-        if(movePath.length === 250){
-            let historicState = movePath[timeDist*50]
-            console.log(movePath)
-            console.log(historicState)
+        if(this.pathHistory.length === this.jumpBackDist){
+            let historicState = this.pathHistory[this.jumpBackDist-1]
+            //console.log(this.pathHistory)
+            //console.log(historicState)
             nextMove = [0,0,1]
             this.x = historicState[0]
             this.y = historicState[1]
-            console.log(this.x,this.y)
+            this.pathHistory = []
+            //console.log(this.x,this.y)
         }
-        
     }
 }
 
@@ -120,9 +141,12 @@ function checkCollisions() {
 //function to reset the game
 function resetGame(){
     clearInterval(gameInterval)
+    spawnList = []
     score = 0
     updateScoreboard()
-    spawnList = [] 
+    player.pathHistory = []
+    player.x = boardOrigin.x
+    player.y = boardOrigin.y
     gameInterval = setInterval(gameTick, 20)
     
 }
@@ -155,8 +179,6 @@ function gameTick()  {
 
 //store the last arrowkey press in the nextMove array. Use that for movement direction. Spacebar to clear. format [axis, direction, speed]
 let nextMove = [0, 0 , 1]
-//array for tracking past movements so player can jump back in time
-let movePath = []
 //function to handle movement. Data is pushed by Player class. Can handle other keypressse
 function movementHandlerKeyDown(e) {
     //console.log('keyboard move was ', e.key)
