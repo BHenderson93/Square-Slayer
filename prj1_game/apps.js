@@ -156,15 +156,17 @@ class TrackingSpawn extends Spawn {
 //generate new spawn dictated by rate, how much time has passed.
 function generateSpawn(rate, spawnSize, speedScaler, type) {
     //console.log(spawnTimer)
+    let size, speedX, speedY, newSpawn, spawnColor
     if (spawnTimer > rate) {
-        spawnTimer = 0
-        let size, speedX, speedY, newSpawn, spawnColor
+        spawnTimer = 0        
+        //spawn rules for infinity mode
         if (gameMode === 'infinityMode') {
-            size = 10 + Math.floor(Math.random() * spawnSize)
+            type == TrackingSpawn ? size = 5 : size = 5 + Math.floor(Math.random() * spawnSize)
             speedX = (speedScaler * 0.5) - Math.random() * speedScaler
             speedY = (speedScaler * 0.5) - Math.random() * speedScaler
-            type === 'TrackingSpawn' ? spawnColor = 'red': spawnColor = 'blue'
+            type === 'TrackingSpawn' ? spawnColor = 'red': spawnColor = `rgb(${Math.floor(Math.random()*255)}, ${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)})`
         }
+        //spawn rules for Zen Mode
         else if (gameMode === 'zenMode') {
             size = 10
             let paths = []
@@ -179,8 +181,9 @@ function generateSpawn(rate, spawnSize, speedScaler, type) {
             spawnColor =`rgb(${Math.floor(Math.random()*255)}, ${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)})`
             type = GeneralSpawn
         }
-        console.log('new spawn')
+
         newSpawn = new type(size, speedX, speedY, spawnColor, speedScaler)
+        console.log(newSpawn.radius)
         if (gameMode==='zenMode'){
             origins = [[0,0] ,[myCanvas.width-newSpawn.radius,0] , [0,myCanvas.height-newSpawn.radius],[myCanvas.width-newSpawn.radius,myCanvas.height-newSpawn.radius]]
             newSpawn.x = origins[Math.floor(Math.random()*origins.length)][0]
@@ -241,7 +244,7 @@ function gameTick(gameMode) {
 
     //spawn stuff
     let randomSpawn = [GeneralSpawn, TrackingSpawn]
-    generateSpawn(50, 0.5, 0.5, randomSpawn[Math.floor(Math.random() * 2)])
+    generateSpawn(50, 15, 0.5, randomSpawn[Math.floor(Math.random() * 2)])
 
     for (let spawn of spawnList) {
         spawn.movement()
@@ -300,7 +303,7 @@ document.addEventListener('keydown', movementHandlerKeyDown)
 document.addEventListener('keyup', movementHandlerKeyUp)
 
 //resetGame also starts the game by setting the interval.
-let gameMode = 'zenMode'
+let gameMode = 'infinityMode'
 let player = new Player()
 player.render()
 let gameInterval = setInterval(gameTick, 20)

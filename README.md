@@ -23,7 +23,6 @@ JavaScript
 ## Future directions
 Square color personalities
 Save the princess! (Go from bottom right to top left). Get back home? Essentially, storyline
-Square that hunts you - smart square
 Menus
 Game difficulty
 Animations when hit
