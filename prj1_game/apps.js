@@ -15,8 +15,8 @@ class Player {
         this.health = 10
         this.speed = 3
         this.color = 'rgb(255,0,0)'
-        this.x = 0
-        this.y = 0
+        this.x = boardOrigin.x
+        this.y = boardOrigin.y
         //this.x = boardOrigin.x
         //this.y = boardOrigin.y
         this.moveSpeed = .7
@@ -83,13 +83,14 @@ class Player {
 //Class specifics for objects spawned into the game board that bounce around and damage Player on contact.
 let spawnList = []
 class Spawn {
-    constructor(radius, dX, dY) {
+    constructor(radius, dX, dY,color, speed) {
         this.radius = radius
         this.dX = dX
         this.dY = dY
         this.x = 0
-        this.y = myCanvas.height / 2
-        this.color = 'black'
+        this.y = 0
+        this.color = color
+        this.speed = speed
         //console.log('My dX, dY is ' , this.dX,this.dY)
     }
 
@@ -103,8 +104,10 @@ class Spawn {
 }
 
 class GeneralSpawn extends Spawn {
-    constructor(radius, dX, dY) {
-        super(radius, dX, dY)
+    constructor(radius, dX, dY,color,speed) {
+        super(radius, dX, dY,color)
+        this.speed = speed
+        this.color = color
         //this.color=`rgb(${Math.floor(Math.random()*255)}, ${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)})`
     }
     movement() {
@@ -118,28 +121,29 @@ class GeneralSpawn extends Spawn {
 }
 
 class TrackingSpawn extends Spawn {
-    constructor(radius, dX, dY, speed) {
-        super(radius, dX, dY)
+    constructor(radius, dX, dY, color, speed) {
+        super(radius, dX, dY,color)
         this.speed = speed
+        this.color = 'red'
     }
     movement() {
         //track the player and follow them after each collision with a wall
         let trackX = player.x - this.x;
         let trackY = player.y - this.y;
         let netTrackDist = Math.sqrt((trackX ** 2) + (trackY ** 2));
-        let netTrackTime = netTrackDist; // (tot dist)/(tot time) === (base dist)/(gametick)
+        let netTrackTime = netTrackDist / this.speed; // (tot dist)/(tot time) === (base dist)/(gametick)
         let trackDX = trackX / netTrackTime;
         let trackDY = trackY / netTrackTime;
         if ((this.x + this.dX + this.radius) <= myCanvas.width && (this.x + this.dX) >= 0) {
         } else {
-            console.log('player and this x,y', player.x, player.y, this.x, this.y, 'track then D', trackX, trackY, trackDX, trackDY)
+            //console.log('player and this x,y', player.x, player.y, this.x, this.y, 'track then D', trackX, trackY, trackDX, trackDY)
             this.dX = trackDX
             this.dY = trackDY
         }
         //check y coords
-        if((this.y + this.dY + this.radius) <= myCanvas.height && (this.y + this.dY) >= 0 ){ 
-        }else{
-            console.log('player and this x,y', player.x, player.y, this.x, this.y, 'track then D', trackX, trackY, trackDX, trackDY)
+        if ((this.y + this.dY + this.radius) <= myCanvas.height && (this.y + this.dY) >= 0) {
+        } else {
+            //console.log('player and this x,y', player.x, player.y, this.x, this.y, 'track then D', trackX, trackY, trackDX, trackDY)
             this.dY = trackDY
             this.dX = trackDX
         }
@@ -154,12 +158,36 @@ function generateSpawn(rate, spawnSize, speedScaler, type) {
     //console.log(spawnTimer)
     if (spawnTimer > rate) {
         spawnTimer = 0
-        let size = 10 + Math.floor(Math.random() * spawnSize)
-        let speedX = (speedScaler * 0.5) - Math.random() * speedScaler
-        let speedY = (speedScaler * 0.5) - Math.random() * speedScaler
-        let newSpawn = new type(size, speedX, speedY)
+        let size, speedX, speedY, newSpawn, spawnColor
+        if (gameMode === 'infinityMode') {
+            size = 10 + Math.floor(Math.random() * spawnSize)
+            speedX = (speedScaler * 0.5) - Math.random() * speedScaler
+            speedY = (speedScaler * 0.5) - Math.random() * speedScaler
+            type === 'TrackingSpawn' ? spawnColor = 'red': spawnColor = 'blue'
+        }
+        else if (gameMode === 'zenMode') {
+            size = 10
+            let paths = []
+            let i = 2
+            while(i<9){
+                paths.push([.3625/i,.35])
+                i+=2
+            }
+            let randPath = Math.floor(Math.random()*paths.length)
+            speedX = paths[randPath][0]
+            speedY = paths[randPath][1]
+            spawnColor =`rgb(${Math.floor(Math.random()*255)}, ${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)})`
+            type = GeneralSpawn
+        }
+        console.log('new spawn')
+        newSpawn = new type(size, speedX, speedY, spawnColor, speedScaler)
+        if (gameMode==='zenMode'){
+            origins = [[0,0] ,[myCanvas.width-newSpawn.radius,0] , [0,myCanvas.height-newSpawn.radius],[myCanvas.width-newSpawn.radius,myCanvas.height-newSpawn.radius]]
+            newSpawn.x = origins[Math.floor(Math.random()*origins.length)][0]
+            newSpawn.y = origins[Math.floor(Math.random()*origins.length)][1]
+        }
         spawnList.push(newSpawn)
-    } else {
+    }else{
         spawnTimer++
     }
 }
@@ -212,7 +240,8 @@ function gameTick(gameMode) {
     updateScoreboard()
 
     //spawn stuff
-    generateSpawn(50, .5 , 0.5, TrackingSpawn)
+    let randomSpawn = [GeneralSpawn, TrackingSpawn]
+    generateSpawn(50, 0.5, 0.5, randomSpawn[Math.floor(Math.random() * 2)])
 
     for (let spawn of spawnList) {
         spawn.movement()
@@ -271,7 +300,7 @@ document.addEventListener('keydown', movementHandlerKeyDown)
 document.addEventListener('keyup', movementHandlerKeyUp)
 
 //resetGame also starts the game by setting the interval.
-
+let gameMode = 'zenMode'
 let player = new Player()
 player.render()
 let gameInterval = setInterval(gameTick, 20)
