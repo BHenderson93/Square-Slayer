@@ -33,13 +33,17 @@ class Player {
         this.y = boardOrigin.y
         this.moveSpeed = 1
         this.radius = gameScaler * .01
+        this.pathHistory = []
     }
     movement(){
+
         //nextMove global variable stores X or Y axis and 1 or -1 by arrowkeys. Ex: down arrowkey = ['y', 1] for increase y axis to move player down.
         let moveAxis = nextMove[0]
-        let moveDist = nextMove[1]*this.moveSpeed
+        let moveDist = nextMove[1]*nextMove[2]*this.moveSpeed
         moveAxis === 'x' ? (this.x + moveDist >= 0 && this.x + moveDist <= myCanvas.width ? this.x += moveDist : null) : null
         moveAxis === 'y' ? (this.y + moveDist >= 0 && this.y + moveDist <= myCanvas.height ? this.y += moveDist : null) : null
+        movePath.unshift([this.x,this.y])
+        movePath.length > 250 ? movePath.pop() : null
     }
 
     //draw the player on at the center of the board
@@ -50,6 +54,20 @@ class Player {
         pencil.fillStyle = this.color
         pencil.arc(this.x, this.y, this.radius, 0, 2 * Math.PI)
         pencil.fill()
+    }
+
+    jumpBack(timeDist){
+        //pick the time distance in seconds back, adjust for game tick/second, and revert state.
+        if(movePath.length === 250){
+            let historicState = movePath[timeDist*50]
+            console.log(movePath)
+            console.log(historicState)
+            nextMove = [0,0,1]
+            this.x = historicState[0]
+            this.y = historicState[1]
+            console.log(this.x,this.y)
+        }
+        
     }
 }
 
@@ -143,31 +161,53 @@ function gameTick()  {
     }
 }
 
-//store the last arrowkey press in the nextMove array. Use that for movement direction. Spacebar to clear.
-let nextMove = [0, 0]
-function movementHandler(e) {
+//store the last arrowkey press in the nextMove array. Use that for movement direction. Spacebar to clear. format [axis, direction, speed]
+let nextMove = [0, 0 , 1]
+//array for tracking past movements so player can jump back in time
+let movePath = []
+//function to handle movement. Data is pushed by Player class.
+function movementHandlerKeyDown(e) {
     //console.log('keyboard move was ', e.key)
     switch (e.key) {
         case "ArrowUp":
-            nextMove = ['y', -1]
+            nextMove[0] = 'y'
+            nextMove[1] = -1
             break
         case "ArrowDown":
-            nextMove = ['y', 1]
+            nextMove[0] = 'y'
+            nextMove[1] = 1
             break
         case "ArrowLeft":
-            nextMove = ['x', -1]
+            nextMove[0] = 'x'
+            nextMove[1] = -1
             break
         case "ArrowRight":
-            nextMove = ['x', 1]
+            nextMove[0] = 'x'
+            nextMove[1] = 1
             break
         case " ":
-            nextMove = [0, 0]
+            nextMove = [0, 0 , 1]
             break
+        case "f":
+            player.jumpBack(3)  
+            break
+        case 'Shift':
+            nextMove[2]=0.3
+    }
+}
+
+//modify movement based on held keys
+function movementHandlerKeyUp(e){
+    //console.log(e.key)
+    switch (e.key){
+        case 'Shift':
+            nextMove[2]=1
     }
 }
 
 
-document.addEventListener('keydown', movementHandler)
+document.addEventListener( 'keydown', movementHandlerKeyDown)
+document.addEventListener( 'keyup' , movementHandlerKeyUp)
 let player = new Player()
 let spawnList = []
 let scoreBoard = document.getElementById('scoreboard')
