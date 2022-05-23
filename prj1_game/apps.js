@@ -83,20 +83,21 @@ class Spawn {
 }
 
 //generate new spawn dictated by rate, how much time has passed.
-function generateSpawn(rate, spawnSize) {
+function generateSpawn(rate, spawnSize, speedScaler) {
     //console.log(spawnTimer)
     if (spawnTimer > rate) {
         spawnTimer = 0
         let size = 10 + Math.floor(Math.random() * spawnSize)
-        let speedX = 0.5 - Math.random()
-        let speedY = 0.5 - Math.random()
+        let speedX = (speedScaler*0.5)-Math.random()*speedScaler
+        let speedY = (speedScaler*0.5)-Math.random()*speedScaler
         let newSpawn = new Spawn(size, speedX, speedY)
         spawnList.push(newSpawn)
     } else {
         spawnTimer++
     }
 }
-function movePieces() { }
+
+//function to see if the player's been hit by one of the obstacles
 function checkCollisions() {
     let playerCoords = [player.x, player.y]
 
@@ -135,7 +136,7 @@ function gameTick()  {
     updateScoreboard()
     //spawn stuff
     
-    generateSpawn(50, 5)
+    generateSpawn(50, 5 , 0.5)
     for(let spawn of spawnList){
         spawn.movement()
         spawn.render()
