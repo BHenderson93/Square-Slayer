@@ -31,19 +31,19 @@ class Player {
         this.color = 'rgb(255,0,0)'
         this.x = boardOrigin.x
         this.y = boardOrigin.y
-        this.moveSpeed = 5
-
-        this.radius = gameScaler * .05
+        this.moveSpeed = 1
+        this.radius = gameScaler * .01
+    }
+    movement(){
+        //nextMove global variable stores X or Y axis and 1 or -1 by arrowkeys. Ex: down arrowkey = ['y', 1] for increase y axis to move player down.
+        let moveAxis = nextMove[0]
+        let moveDist = nextMove[1]*this.moveSpeed
+        moveAxis === 'x' ? (this.x + moveDist >= 0 && this.x + moveDist <= myCanvas.width ? this.x += moveDist : null) : null
+        moveAxis === 'y' ? (this.y + moveDist >= 0 && this.y + moveDist <= myCanvas.height ? this.y += moveDist : null) : null
     }
 
     //draw the player on at the center of the board
     render() {
-
-        //additional outer hitbox for testing
-        pencil.beginPath()
-        pencil.fillStyle = `rgb(100,0,0, 50)`
-        pencil.rect(this.x, this.y, this.radius, this.radius)
-        pencil.fill()
 
         //Central player
         pencil.beginPath()
@@ -61,6 +61,8 @@ class Spawn {
         this.dY = dY
         this.x = 0
         this.y = myCanvas.height / 2
+        this.color = `rgb(${Math.floor(Math.random()*255)}, ${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)})`
+        console.log('My dX, dY is ' , this.dX,this.dY)
     }
     movement() {
         //console.log(this.x,this.dX,this.y,this.dY);
@@ -73,6 +75,7 @@ class Spawn {
         return null
     }
     render() {
+        pencil.fillStyle = this.color
         pencil.fillRect(this.x, this.y, this.radius, this.radius)
     }
     redirect() {
@@ -81,13 +84,13 @@ class Spawn {
 }
 
 //generate new spawn dictated by rate, how much time has passed.
-function generateSpawn(rate) {
-    console.log(spawnTimer)
+function generateSpawn(rate, spawnSize) {
+    //console.log(spawnTimer)
     if (spawnTimer > rate) {
         spawnTimer = 0
-        let size = 10 + Math.floor(Math.random() * 20)
-        let speedX = 0.5 + Math.floor(Math.random())
-        let speedY = 0.5 + Math.floor(Math.random())
+        let size = 10 + Math.floor(Math.random() * spawnSize)
+        let speedX = 0.5 - Math.random()
+        let speedY = 0.5 - Math.random()
         let newSpawn = new Spawn(size, speedX, speedY)
         spawnList.push(newSpawn)
     } else {
@@ -100,18 +103,18 @@ function checkCollisions() {//border and other pieces
 
 //Function to advance the game by one 'tick' each 60ms.
 let spawnTimer = 0
-function gameTick() {
+function gameTick()  {
     pencil.clearRect(0, 0, myCanvas.width, myCanvas.height)
     //redraw static pieces of the gameboard
     //check to see if the next move is within the bounds specified.
 
     //let playerChain = (player.x**2)+(player.y**2)
-    //nextMove[0] === 'x'? player.x += nextMove[1]*player.moveSpeed:player.y+=nextMove[1]*player.moveSpeed
-    //player.render()
+    player.movement()
+    player.render()
 
     //spawn stuff
     
-    generateSpawn(150, spawnTimer)
+    generateSpawn(150, 5)
     for(let spawn of spawnList){
         spawn.movement()
         spawn.render()
@@ -153,7 +156,7 @@ let score = 0
 /* let spawn = new Spawn(20, 1, 1)
 let spawn2 = new Spawn(20, 1.1, 1.1)
 spawn.render() */
-//player.render()
+player.render()
 setInterval(gameTick, 20)
 
 
