@@ -219,7 +219,7 @@ function generateSpawn(rate, spawnSize, speedScaler, type) {
         //generate new spawn based off above gameMode construction logic
         newSpawn = new type(size, speedX, speedY, spawnColor, speedScaler*windowDependentScaler)
         //console.log(newSpawn.radius)
-        if (gameSettings.mode === 'zenMode') {
+        if (gameSettings.mode === 'zenMode' || gameSettings.difficulty === 'Bananas') {
             origins = [[0, 0], [myCanvas.width - newSpawn.radius, 0], [0, myCanvas.height - newSpawn.radius], [myCanvas.width - newSpawn.radius, myCanvas.height - newSpawn.radius]]
             newSpawn.x = origins[Math.floor(Math.random() * origins.length)][0]
             newSpawn.y = origins[Math.floor(Math.random() * origins.length)][1]
