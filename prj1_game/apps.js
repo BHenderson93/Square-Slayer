@@ -179,7 +179,7 @@ function generateSpawn(rate, spawnSize, speedScaler, type) {
                 spawnColor = 'red'
                 speedX = -.1
                 speedY = -.1
-                speedScaler = .8
+                speedScaler = .8*speedScaler
             } else {
                 gameSettings.difficulty == 'Bananas' ? size =spawnSize*windowDependentScaler : size = (5 + Math.floor(Math.random() * spawnSize))* windowDependentScaler
                 speedX = (speedScaler * 0.5) - Math.random() * speedScaler*windowDependentScaler
@@ -278,9 +278,8 @@ function gameTick() {
             spawnLogic = [50,20,1,randomSpawn[Math.floor(Math.random() * 2)]]
             break
         case "Bananas":
-            spawnLogic = [10,5, 2,randomSpawn[0]]
+            spawnLogic = [10,5, 1.75,randomSpawn[0]]
             break
-
     }
     
     generateSpawn(spawnLogic[0],spawnLogic[1],spawnLogic[2],spawnLogic[3])
