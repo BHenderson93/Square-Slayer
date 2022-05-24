@@ -27,8 +27,10 @@ class Player {
         this.pathHistory = []
         this.jumpBackDist = 250
         this.detonateTimer = 0
-        this.detonateCD = 500
-        this.detonateRadius = this.radius * 12
+        this.detonateCD = 400
+        this.detonateRadius = this.radius * 16
+        this.detonationAnimationDuration = 12
+        this.detonationAnimationState = 0
     }
 
     movement() {
@@ -43,6 +45,7 @@ class Player {
 
         //also add 1 to detonate timer for it's cooldown
         this.detonateTimer < this.detonateCD ? this.detonateTimer += 1 : null
+        this.detonationAnimationState > 0 ? this.detonationAnimationState++ :null
     }
 
     //draw the player on at the center of the board
@@ -67,12 +70,20 @@ class Player {
             }
 
             //show detonate radius
-            if (this.detonateTimer > this.detonateCD/2){
+            if (this.detonateTimer === this.detonateCD){
                 pencil.beginPath()
-                this.detonateTimer > this.detonateCD/2 ? pencil.strokeStyle = 'darkgreen' : pencil.strokeStyle = 'blue'
+                pencil.strokeStyle = 'darkgreen' 
                 pencil.arc(this.x,this.y,this.detonateRadius,0,2*Math.PI)
                 pencil.stroke()
-            } 
+            }
+            //detonation animation
+            if(this.detonationAnimationState > 0 ){
+                pencil.beginPath()
+                pencil.fillStyle=this.color
+                pencil.arc(this.x,this.y,(this.detonateRadius/(this.detonationAnimationDuration/this.detonationAnimationState)), 0 , 2*Math.PI)
+                pencil.fill()
+                this.detonationAnimationState >= this.detonationAnimationDuration ? this.detonationAnimationState = 0 : null
+            }
         }
 
         //Central player
@@ -100,6 +111,7 @@ class Player {
         if (this.detonateTimer === this.detonateCD) {
             checkCollisions(this.detonateRadius , 'Detonate')
             this.detonateTimer = 0
+            this.detonationAnimationState = 1
         }
     }
 }
@@ -287,6 +299,8 @@ function resetGame() {
     player.pathHistory = []
     player.x = boardOrigin.x
     player.y = boardOrigin.y
+    player.detonateTimer = 0
+    player.detonationAnimationState = 0
     nextMove = [0, 0, 1]
     gameInterval = setInterval(gameTick, 20)
 
