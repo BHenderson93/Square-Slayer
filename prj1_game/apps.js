@@ -83,7 +83,7 @@ class Player {
 //Class specifics for objects spawned into the game board that bounce around and damage Player on contact.
 let spawnList = []
 class Spawn {
-    constructor(radius, dX, dY,color, speed) {
+    constructor(radius, dX, dY, color, speed) {
         this.radius = radius
         this.dX = dX
         this.dY = dY
@@ -104,10 +104,8 @@ class Spawn {
 }
 
 class GeneralSpawn extends Spawn {
-    constructor(radius, dX, dY,color,speed) {
-        super(radius, dX, dY,color)
-        this.speed = speed
-        this.color = color
+    constructor(radius, dX, dY, color, speed) {
+        super(radius, dX, dY, color, speed)
         //this.color=`rgb(${Math.floor(Math.random()*255)}, ${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)})`
     }
     movement() {
@@ -122,8 +120,7 @@ class GeneralSpawn extends Spawn {
 
 class TrackingSpawn extends Spawn {
     constructor(radius, dX, dY, color, speed) {
-        super(radius, dX, dY,color)
-        this.speed = speed
+        super(radius, dX, dY, color, speed)
         this.color = 'red'
     }
     movement() {
@@ -158,39 +155,47 @@ function generateSpawn(rate, spawnSize, speedScaler, type) {
     //console.log(spawnTimer)
     let size, speedX, speedY, newSpawn, spawnColor
     if (spawnTimer > rate) {
-        spawnTimer = 0        
+        spawnTimer = 0
         //spawn rules for infinity mode
-        if (gameMode === 'infinityMode') {
-            type == TrackingSpawn ? size = 5 : size = 5 + Math.floor(Math.random() * spawnSize)
-            speedX = (speedScaler * 0.5) - Math.random() * speedScaler
-            speedY = (speedScaler * 0.5) - Math.random() * speedScaler
-            type === 'TrackingSpawn' ? spawnColor = 'red': spawnColor = `rgb(${Math.floor(Math.random()*255)}, ${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)})`
+        if (gameSettings.mode === 'infinityMode') {
+            if (type === TrackingSpawn) {
+                size = 5
+                spawnColor = 'red'
+                speedX = 1
+                speedY = 1
+                speedScaler = .8
+            } else {
+                size = 5 + Math.floor(Math.random() * spawnSize)
+                speedX = (speedScaler * 0.5) - Math.random() * speedScaler
+                speedY = (speedScaler * 0.5) - Math.random() * speedScaler
+                spawnColor = `rgb(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)},${Math.floor(Math.random() * 255)})`
+            }
         }
         //spawn rules for Zen Mode
-        else if (gameMode === 'zenMode') {
+        else if (gameSettings.mode === 'zenMode') {
             size = 10
             let paths = []
             let i = 2
-            while(i<9){
-                paths.push([.3625/i,.35])
-                i+=2
+            while (i < 9) {
+                paths.push([.3625 / i, .35])
+                i += 2
             }
-            let randPath = Math.floor(Math.random()*paths.length)
+            let randPath = Math.floor(Math.random() * paths.length)
             speedX = paths[randPath][0]
             speedY = paths[randPath][1]
-            spawnColor =`rgb(${Math.floor(Math.random()*255)}, ${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)})`
+            spawnColor = `rgb(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)},${Math.floor(Math.random() * 255)})`
             type = GeneralSpawn
         }
 
         newSpawn = new type(size, speedX, speedY, spawnColor, speedScaler)
-        console.log(newSpawn.radius)
-        if (gameMode==='zenMode'){
-            origins = [[0,0] ,[myCanvas.width-newSpawn.radius,0] , [0,myCanvas.height-newSpawn.radius],[myCanvas.width-newSpawn.radius,myCanvas.height-newSpawn.radius]]
-            newSpawn.x = origins[Math.floor(Math.random()*origins.length)][0]
-            newSpawn.y = origins[Math.floor(Math.random()*origins.length)][1]
+        //console.log(newSpawn.radius)
+        if (gameSettings.mode === 'zenMode') {
+            origins = [[0, 0], [myCanvas.width - newSpawn.radius, 0], [0, myCanvas.height - newSpawn.radius], [myCanvas.width - newSpawn.radius, myCanvas.height - newSpawn.radius]]
+            newSpawn.x = origins[Math.floor(Math.random() * origins.length)][0]
+            newSpawn.y = origins[Math.floor(Math.random() * origins.length)][1]
         }
         spawnList.push(newSpawn)
-    }else{
+    } else {
         spawnTimer++
     }
 }
@@ -218,6 +223,7 @@ function resetGame() {
     player.pathHistory = []
     player.x = boardOrigin.x
     player.y = boardOrigin.y
+    nextMove = [0,0,1]
     gameInterval = setInterval(gameTick, 20)
 
 }
@@ -234,7 +240,7 @@ function updateScoreboard() {
 let spawnTimer = 0
 //let tSpawn = new TrackingSpawn(10, 0.5, 0.5, .5)
 //spawnList.push(tSpawn)
-function gameTick(gameMode) {
+function gameTick() {
     //clear board and redraw
     pencil.clearRect(0, 0, myCanvas.width, myCanvas.height)
     player.movement()
@@ -244,7 +250,7 @@ function gameTick(gameMode) {
 
     //spawn stuff
     let randomSpawn = [GeneralSpawn, TrackingSpawn]
-    generateSpawn(50, 15, 0.5, randomSpawn[Math.floor(Math.random() * 2)])
+    generateSpawn(100, 15, 0.5, randomSpawn[Math.floor(Math.random() * 2)])
 
     for (let spawn of spawnList) {
         spawn.movement()
@@ -298,12 +304,57 @@ function movementHandlerKeyUp(e) {
     }
 }
 
-//event listeners for keyboard presses
+//Handle buttonclicks
+function settingClick(e) {
+    console.log('in settings')
+    let rosettaSettings = {
+        challengeMode: "Challenge Mode",
+        infinityMode: "Infinity Mode",
+        zenMode: "Zen Mode"
+    }
+    switch (e.target.id) {
+        //game mode selections
+        case 'challenge-mode':
+            gameSettings.mode = 'challengeMode'
+            resetGame()
+            break
+        case 'infinity-mode':
+            gameSettings.mode = 'infinityMode'
+            resetGame()
+            break
+        case 'zen-mode':
+            gameSettings.mode = 'zenMode'
+            resetGame()
+            break
+        //difficulty selections
+        case 'easy-difficulty':
+            gameSettings.difficulty = 'Easy'
+            resetGame()
+            break
+        case 'medium-difficulty':
+            gameSettings.difficulty = 'Medium'
+            resetGame()
+            break
+        case 'hard-difficulty':
+            gameSettings.difficulty = 'Hard'
+            resetGame()
+            break
+        case 'bananas':
+            gameSettings.difficulty = 'Bananas'
+            resetGame()
+            break
+    }
+    document.getElementById('current-mode').textContent = rosettaSettings[gameSettings.mode]
+    document.getElementById('current-difficulty').textContent = gameSettings.difficulty
+}
+
+//event listeners for keyboard presses and clicks
 document.addEventListener('keydown', movementHandlerKeyDown)
 document.addEventListener('keyup', movementHandlerKeyUp)
+document.getElementById('scoreboard-container').addEventListener('click', settingClick)
 
 //resetGame also starts the game by setting the interval.
-let gameMode = 'infinityMode'
+let gameSettings = { mode: 'zenMode', difficulty: 'Easy' }
 let player = new Player()
 player.render()
 let gameInterval = setInterval(gameTick, 20)

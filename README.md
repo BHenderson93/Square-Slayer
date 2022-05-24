@@ -28,5 +28,6 @@ Game difficulty
 Animations when hit
 Sound effects on border collision
 Square explosions?
+Change innerWidth to clearup the blurr (hopefully)
 
-
+Purple exploding square that emits particles

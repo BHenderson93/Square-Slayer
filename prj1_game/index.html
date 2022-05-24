@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -8,28 +9,33 @@
     <link rel="stylesheet" href="style.css">
     <script src="apps.js" async defer></script>
 </head>
+
 <body>
-    
-    
+
+
     <canvas id="gameboard"></canvas>
     <div id="scoreboard-container">
-        <h1 id="scoreboard">Score: 0</h1>
+        <ul>
+            <h1 id="scoreboard">Score: 0</h1>
+            <h2 id="current-mode">Zen Mode</h2>
+            <h2 id="current-difficulty">Easy</h2>
+        </ul>
         <ul id="options">
             <ul id="game-mode-list">
                 <h2 id="menuheader">Choose Mode</h2>
-                <li><button id="challenge-mode">Challenge Rounds</button></li> 
+                <li><button id="challenge-mode">Challenge Rounds</button></li>
                 <li><button id="infinity-mode">Infinity Mode</button></li>
-                <li><button id="zen-mdoe">Zen Mode</button></li>
+                <li><button id="zen-mode">Zen Mode</button></li>
             </ul>
             <ul id="difficulty-list">
                 <h2 id="difficulty-header">Choose Difficulty</h2>
-                <li><button id="easy-difficulty">Easy</button></li>    
+                <li><button id="easy-difficulty">Easy</button></li>
                 <li><button id="medium-difficulty">Medium</button></li>
                 <li><button id="hard-difficulty">Hard</button></li>
-                <li><button id="super-hard">Absolutely Bananas</button></li>             
+                <li><button id="bananas">Absolutely Bananas</button></li>
             </ul>
-
         </ul>
     </div>
 </body>
+
 </html>

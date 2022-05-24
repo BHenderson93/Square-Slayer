@@ -23,6 +23,8 @@ h1{
 }
 h2{
     text-decoration: underline;
+    margin:0;
+    text-align: center;
 }
 
 ul{
@@ -55,4 +57,9 @@ button{
 
 #scoreboard{
     justify-self: flex-start;
+}
+
+#current-mode, #current-difficulty{
+    text-decoration: none;
+    text-align: center;
 }
