@@ -28,6 +28,7 @@ class Player {
         this.jumpBackDist = 250
         this.detonateTimer = 0
         this.detonateCD = 400
+        gameSettings.difficulty === 'Bananas' ? this.detonateCD=100 :null
         this.detonateRadius = this.radius * 16
         this.detonationAnimationDuration = 12
         this.detonationAnimationState = 0
@@ -45,7 +46,7 @@ class Player {
 
         //also add 1 to detonate timer for it's cooldown
         this.detonateTimer < this.detonateCD ? this.detonateTimer += 1 : null
-        this.detonationAnimationState > 0 ? this.detonationAnimationState++ :null
+        this.detonationAnimationState > 0 ? this.detonationAnimationState++ : null
     }
 
     //draw the player on at the center of the board
@@ -103,12 +104,17 @@ class Player {
             this.x = historicState[0]
             this.y = historicState[1]
             this.pathHistory = []
+            gameSettings.mode === 'Bananas' ? this.detonate(true) : null
             //console.log(this.x,this.y)
         }
     }
 
-    detonate() {
-        if (this.detonateTimer === this.detonateCD) {
+    detonate(boolOverride) {
+        if(boolOverride === true){
+            checkCollisions(this.detonateRadius , 'Detonate')
+            this.detonationAnimationState = 1
+        }
+        else if (this.detonateTimer === this.detonateCD) {
             checkCollisions(this.detonateRadius , 'Detonate')
             this.detonateTimer = 0
             this.detonationAnimationState = 1
@@ -294,6 +300,7 @@ function checkCollisions(radius, reason) {
 function resetGame() {
     clearInterval(gameInterval)
     spawnList = []
+    spawnKills = []
     score = 0
     updateScoreboard()
     player.pathHistory = []
@@ -303,15 +310,15 @@ function resetGame() {
     player.detonationAnimationState = 0
     nextMove = [0, 0, 1]
     gameInterval = setInterval(gameTick, 20)
-
 }
 
 //function to update scoreboard and track current score
 let score = 0
 let scoreBoard = document.getElementById('scoreboard')
 function updateScoreboard() {
-    score += spawnList.length / 50
+    gameSettings.difficulty === 'Bananas' ? score=spawnKills.length : score += spawnList.length / 50
     scoreBoard.textContent = `Score: ${Math.floor(score)}`
+    //add killed spawn somewhere in score
 }
 
 //Function to advance the game by one 'tick' each 60ms.
@@ -441,6 +448,7 @@ function settingClick(e) {
             resetGame()
             break
     }
+    player = new Player()
     document.getElementById('current-mode').textContent = rosettaSettings[gameSettings.mode]
     document.getElementById('current-difficulty').textContent = gameSettings.difficulty
 }
@@ -455,4 +463,3 @@ let gameSettings = { mode: 'zenMode', difficulty: 'Easy' }
 let player = new Player()
 player.render()
 let gameInterval = setInterval(gameTick, 20)
-
