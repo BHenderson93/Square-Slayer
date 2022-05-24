@@ -2,10 +2,10 @@ console.log('apps.js synced')
 
 let myCanvas = document.getElementById('gameboard')
 let pencil = myCanvas.getContext('2d')
-const screenScaleInfo = Math.round(Math.min(window.innerHeight*2 , window.innerWidth)/100)*100
+const screenScaleInfo = Math.round(Math.min(window.innerHeight * 2, window.innerWidth) / 100) * 100
 pencil.canvas.width = screenScaleInfo
-pencil.canvas.height = screenScaleInfo/2
-const windowDependentScaler = screenScaleInfo/300
+pencil.canvas.height = screenScaleInfo / 2
+const windowDependentScaler = screenScaleInfo / 300
 
 //x and y coordinates for center of the board, as well as gameScalers for screen sizes
 const boardOrigin = { x: myCanvas.width / 2, y: myCanvas.height / 2 }
@@ -22,10 +22,13 @@ class Player {
         this.y = boardOrigin.y
         //this.x = boardOrigin.x
         //this.y = boardOrigin.y
-        this.moveSpeed = .7*windowDependentScaler
+        this.moveSpeed = .7 * windowDependentScaler
         this.radius = gameScaler * .01
         this.pathHistory = []
         this.jumpBackDist = 250
+        this.detonateTimer = 0
+        this.detonateCD = 500
+        this.detonateRadius = this.radius * 12
     }
 
     movement() {
@@ -37,6 +40,9 @@ class Player {
         moveAxis === 'y' ? (this.y + moveDist >= 0 && this.y + moveDist <= myCanvas.height ? this.y += moveDist : null) : null
         this.pathHistory.unshift([this.x, this.y])
         this.pathHistory.length > this.jumpBackDist ? this.pathHistory.pop() : null
+
+        //also add 1 to detonate timer for it's cooldown
+        this.detonateTimer < this.detonateCD ? this.detonateTimer += 1 : null
     }
 
     //draw the player on at the center of the board
@@ -59,6 +65,14 @@ class Player {
                 pencil.stroke()
                 prevNode = node
             }
+
+            //show detonate radius
+            if (this.detonateTimer > this.detonateCD/2){
+                pencil.beginPath()
+                this.detonateTimer > this.detonateCD/2 ? pencil.strokeStyle = 'darkgreen' : pencil.strokeStyle = 'blue'
+                pencil.arc(this.x,this.y,this.detonateRadius,0,2*Math.PI)
+                pencil.stroke()
+            } 
         }
 
         //Central player
@@ -79,6 +93,13 @@ class Player {
             this.y = historicState[1]
             this.pathHistory = []
             //console.log(this.x,this.y)
+        }
+    }
+
+    detonate() {
+        if (this.detonateTimer === this.detonateCD) {
+            checkCollisions(this.detonateRadius , 'Detonate')
+            this.detonateTimer = 0
         }
     }
 }
@@ -111,22 +132,22 @@ class GeneralSpawn extends Spawn {
         super(radius, dX, dY, color, speed)
         //this.noise = document.getElementById('sound')
         //console.log(this.noise)
-        
+
         //this.color=`rgb(${Math.floor(Math.random()*255)}, ${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)})`
     }
     movement() {
         //Bounce off the walls and move across screen
-        if((this.x + this.dX + this.radius) <= myCanvas.width && (this.x + this.dX) >= 0 ){ 
+        if ((this.x + this.dX + this.radius) <= myCanvas.width && (this.x + this.dX) >= 0) {
             null
-        }else{
+        } else {
             this.dX *= (-1)
             //this.noise.play()
-        } 
+        }
         this.x += this.dX;
         //check y coords
-        if((this.y + this.dY + this.radius) <= myCanvas.height && (this.y + this.dY) >= 0){
-            null 
-        } else{ 
+        if ((this.y + this.dY + this.radius) <= myCanvas.height && (this.y + this.dY) >= 0) {
+            null
+        } else {
             this.dY *= (-1)
             //this.noise.play()
         }
@@ -175,35 +196,35 @@ function generateSpawn(rate, spawnSize, speedScaler, type) {
         //spawn rules for infinity mode
         if (gameSettings.mode === 'infinityMode') {
             if (type === TrackingSpawn) {
-                size = 5*windowDependentScaler
+                size = 5 * windowDependentScaler
                 spawnColor = 'red'
                 speedX = -.1
                 speedY = -.1
-                switch (gameSettings.difficulty){
+                switch (gameSettings.difficulty) {
                     case "Easy":
-                        speedScaler = 1.5*speedScaler
+                        speedScaler = 1.5 * speedScaler
                         break
                     case "Medium":
-                        speedScaler = 1.3*speedScaler
+                        speedScaler = 1.3 * speedScaler
                         break
                     case "Hard":
-                        speedScaler = 2.1*speedScaler
+                        speedScaler = 2.1 * speedScaler
                         break
                     case "Bananas":
-                        speedScaler = 1.5*speedScaler
+                        speedScaler = 1.5 * speedScaler
                         break
                 }
-                    
+
             } else {
-                gameSettings.difficulty === 'Bananas' ? size =spawnSize*windowDependentScaler : size = (5 + Math.floor(Math.random() * spawnSize))* windowDependentScaler
-                speedX = (speedScaler * 0.5) - Math.random() * speedScaler*windowDependentScaler
-                speedY = (speedScaler * 0.5) - Math.random() * speedScaler*windowDependentScaler
+                gameSettings.difficulty === 'Bananas' ? size = spawnSize * windowDependentScaler : size = (5 + Math.floor(Math.random() * spawnSize)) * windowDependentScaler
+                speedX = (speedScaler * 0.5) - Math.random() * speedScaler * windowDependentScaler
+                speedY = (speedScaler * 0.5) - Math.random() * speedScaler * windowDependentScaler
                 spawnColor = `rgb(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)},${Math.floor(Math.random() * 255)})`
             }
         }
         //spawn rules for Zen Mode
         else if (gameSettings.mode === 'zenMode') {
-            size = 10*windowDependentScaler
+            size = 10 * windowDependentScaler
             let paths = []
             let i = 2
             while (i < 9) {
@@ -211,13 +232,13 @@ function generateSpawn(rate, spawnSize, speedScaler, type) {
                 i += 2
             }
             let randPath = Math.floor(Math.random() * paths.length)
-            speedX = paths[randPath][0]*windowDependentScaler
-            speedY = paths[randPath][1]*windowDependentScaler
+            speedX = paths[randPath][0] * windowDependentScaler
+            speedY = paths[randPath][1] * windowDependentScaler
             spawnColor = `rgb(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)},${Math.floor(Math.random() * 255)})`
             type = GeneralSpawn
         }
         //generate new spawn based off above gameMode construction logic
-        newSpawn = new type(size, speedX, speedY, spawnColor, speedScaler*windowDependentScaler)
+        newSpawn = new type(size, speedX, speedY, spawnColor, speedScaler * windowDependentScaler)
         //console.log(newSpawn.radius)
         if (gameSettings.mode === 'zenMode' || gameSettings.difficulty === 'Bananas') {
             origins = [[0, 0], [myCanvas.width - newSpawn.radius, 0], [0, myCanvas.height - newSpawn.radius], [myCanvas.width - newSpawn.radius, myCanvas.height - newSpawn.radius]]
@@ -231,17 +252,30 @@ function generateSpawn(rate, spawnSize, speedScaler, type) {
 }
 
 //function to see if the player's been hit by one of the obstacles
-function checkCollisions() {
-
+let spawnKills = []
+function checkCollisions(radius, reason) {
+    let tempSpawn = []
     for (let spawn of spawnList) {
         //spawn hit box dimensions include player dimensions so that only player x and y coordinates need to be calculated after.
-        let spawnHitBox = { xMin: spawn.x - player.radius, xMax: spawn.x + spawn.radius + player.radius, yMin: spawn.y - player.radius, yMax: spawn.y + spawn.radius + player.radius }
+        let spawnHitBox = { xMin: spawn.x - radius, xMax: spawn.x + spawn.radius + radius, yMin: spawn.y - radius, yMax: spawn.y + spawn.radius + radius }
         //console.log(spawnHitBox)
         if (player.x < spawnHitBox.xMax && player.x > spawnHitBox.xMin && player.y > spawnHitBox.yMin && player.y < spawnHitBox.yMax) {
-            console.log('Hit!')
-            clearInterval(gameInterval)
+            if (reason === 'Death') {
+                console.log(`You've been hit!`)
+                clearInterval(gameInterval)
+                tempSpawn.push(spawn)
+            } else if (reason === 'Detonate') {
+                //remove the spawn if in detonate radius.
+                spawnKills.push(spawn)
+            }
+        } else{
+            //if spawns not in hitbox, add them to temp array to readd to spawnlist. Done so that spawn can be removed using checkcollisions function.
+            tempSpawn.push(spawn)
         }
+        spawnList=tempSpawn
     }
+
+
 }
 
 //function to reset the game
@@ -253,7 +287,7 @@ function resetGame() {
     player.pathHistory = []
     player.x = boardOrigin.x
     player.y = boardOrigin.y
-    nextMove = [0,0,1]
+    nextMove = [0, 0, 1]
     gameInterval = setInterval(gameTick, 20)
 
 }
@@ -275,28 +309,28 @@ function gameTick() {
     pencil.clearRect(0, 0, myCanvas.width, myCanvas.height)
     player.movement()
     player.render()
-    checkCollisions()
+    checkCollisions(player.radius, 'Death')
     updateScoreboard()
 
     //spawn stuff
     let spawnLogic
     let randomSpawn = [GeneralSpawn, TrackingSpawn]
-    switch (gameSettings.difficulty){
+    switch (gameSettings.difficulty) {
         case "Easy":
-            spawnLogic = [200,15,0.5,randomSpawn[0]]
+            spawnLogic = [200, 15, 0.5, randomSpawn[0]]
             break
         case "Medium":
-            spawnLogic = [125,15,.5,randomSpawn[Math.floor(Math.random() * 2)]]
+            spawnLogic = [125, 15, .5, randomSpawn[Math.floor(Math.random() * 2)]]
             break
         case "Hard":
-            spawnLogic = [50,15,0.5,randomSpawn[Math.floor(Math.random() * 2)]]
+            spawnLogic = [50, 15, 0.5, randomSpawn[Math.floor(Math.random() * 2)]]
             break
         case "Bananas":
-            spawnLogic = [10,5, 1,randomSpawn[0]]
+            spawnLogic = [10, 5, 1, randomSpawn[0]]
             break
     }
-    
-    generateSpawn(spawnLogic[0],spawnLogic[1],spawnLogic[2],spawnLogic[3])
+
+    generateSpawn(spawnLogic[0], spawnLogic[1], spawnLogic[2], spawnLogic[3])
 
     for (let spawn of spawnList) {
         spawn.movement()
@@ -330,7 +364,10 @@ function movementHandlerKeyDown(e) {
             nextMove = [0, 0, 1]
             break
         case "f":
-            player.jumpBack(3)
+            player.jumpBack()
+            break
+        case "d":
+            player.detonate()
             break
         case 'Shift':
             nextMove[2] = 0.3
