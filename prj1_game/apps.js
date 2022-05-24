@@ -2,6 +2,10 @@ console.log('apps.js synced')
 
 let myCanvas = document.getElementById('gameboard')
 let pencil = myCanvas.getContext('2d')
+const screenScaleInfo = Math.round(Math.min(window.innerHeight*2 , window.innerWidth)/100)*100
+pencil.canvas.width = screenScaleInfo
+pencil.canvas.height = screenScaleInfo/2
+const windowDependentScaler = screenScaleInfo/300
 
 //x and y coordinates for center of the board, as well as gameScalers for screen sizes
 const boardOrigin = { x: myCanvas.width / 2, y: myCanvas.height / 2 }
@@ -13,13 +17,12 @@ class Player {
     //take in player attributes and construct object.
     constructor(color) {
         this.health = 10
-        this.speed = 3
         this.color = 'rgb(255,0,0)'
         this.x = boardOrigin.x
         this.y = boardOrigin.y
         //this.x = boardOrigin.x
         //this.y = boardOrigin.y
-        this.moveSpeed = .7
+        this.moveSpeed = .7*windowDependentScaler
         this.radius = gameScaler * .01
         this.pathHistory = []
         this.jumpBackDist = 350
@@ -147,7 +150,6 @@ class TrackingSpawn extends Spawn {
         this.y += this.dY;
         this.x += this.dX;
     }
-
 }
 
 //generate new spawn dictated by rate, how much time has passed.
@@ -159,21 +161,21 @@ function generateSpawn(rate, spawnSize, speedScaler, type) {
         //spawn rules for infinity mode
         if (gameSettings.mode === 'infinityMode') {
             if (type === TrackingSpawn) {
-                size = 5
+                size = 5*windowDependentScaler
                 spawnColor = 'red'
-                speedX = 1
-                speedY = 1
+                speedX = -.1
+                speedY = -.1
                 speedScaler = .8
             } else {
-                size = 5 + Math.floor(Math.random() * spawnSize)
-                speedX = (speedScaler * 0.5) - Math.random() * speedScaler
-                speedY = (speedScaler * 0.5) - Math.random() * speedScaler
+                size = (5 + Math.floor(Math.random() * spawnSize))* windowDependentScaler
+                speedX = (speedScaler * 0.5) - Math.random() * speedScaler*windowDependentScaler
+                speedY = (speedScaler * 0.5) - Math.random() * speedScaler*windowDependentScaler
                 spawnColor = `rgb(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)},${Math.floor(Math.random() * 255)})`
             }
         }
         //spawn rules for Zen Mode
         else if (gameSettings.mode === 'zenMode') {
-            size = 10
+            size = 10*windowDependentScaler
             let paths = []
             let i = 2
             while (i < 9) {
@@ -181,13 +183,13 @@ function generateSpawn(rate, spawnSize, speedScaler, type) {
                 i += 2
             }
             let randPath = Math.floor(Math.random() * paths.length)
-            speedX = paths[randPath][0]
-            speedY = paths[randPath][1]
+            speedX = paths[randPath][0]*windowDependentScaler
+            speedY = paths[randPath][1]*windowDependentScaler
             spawnColor = `rgb(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)},${Math.floor(Math.random() * 255)})`
             type = GeneralSpawn
         }
-
-        newSpawn = new type(size, speedX, speedY, spawnColor, speedScaler)
+        //generate new spawn based off above gameMode construction logic
+        newSpawn = new type(size, speedX, speedY, spawnColor, speedScaler*windowDependentScaler)
         //console.log(newSpawn.radius)
         if (gameSettings.mode === 'zenMode') {
             origins = [[0, 0], [myCanvas.width - newSpawn.radius, 0], [0, myCanvas.height - newSpawn.radius], [myCanvas.width - newSpawn.radius, myCanvas.height - newSpawn.radius]]
