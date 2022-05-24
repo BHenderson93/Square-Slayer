@@ -109,14 +109,27 @@ class Spawn {
 class GeneralSpawn extends Spawn {
     constructor(radius, dX, dY, color, speed) {
         super(radius, dX, dY, color, speed)
+        //this.noise = document.getElementById('sound')
+        //console.log(this.noise)
+        
         //this.color=`rgb(${Math.floor(Math.random()*255)}, ${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)})`
     }
     movement() {
         //Bounce off the walls and move across screen
-        (this.x + this.dX + this.radius) <= myCanvas.width && (this.x + this.dX) >= 0 ? null : this.dX *= (-1)
+        if((this.x + this.dX + this.radius) <= myCanvas.width && (this.x + this.dX) >= 0 ){ 
+            null
+        }else{
+            this.dX *= (-1)
+            //this.noise.play()
+        } 
         this.x += this.dX;
         //check y coords
-        (this.y + this.dY + this.radius) <= myCanvas.height && (this.y + this.dY) >= 0 ? null : this.dY *= (-1)
+        if((this.y + this.dY + this.radius) <= myCanvas.height && (this.y + this.dY) >= 0){
+            null 
+        } else{ 
+            this.dY *= (-1)
+            //this.noise.play()
+        }
         this.y += this.dY;
     }
 }
@@ -157,6 +170,7 @@ function generateSpawn(rate, spawnSize, speedScaler, type) {
     //console.log(spawnTimer)
     let size, speedX, speedY, newSpawn, spawnColor
     if (spawnTimer > rate) {
+
         spawnTimer = 0
         //spawn rules for infinity mode
         if (gameSettings.mode === 'infinityMode') {
@@ -167,7 +181,7 @@ function generateSpawn(rate, spawnSize, speedScaler, type) {
                 speedY = -.1
                 speedScaler = .8
             } else {
-                size = (5 + Math.floor(Math.random() * spawnSize))* windowDependentScaler
+                gameSettings.difficulty == 'Bananas' ? size =spawnSize*windowDependentScaler : size = (5 + Math.floor(Math.random() * spawnSize))* windowDependentScaler
                 speedX = (speedScaler * 0.5) - Math.random() * speedScaler*windowDependentScaler
                 speedY = (speedScaler * 0.5) - Math.random() * speedScaler*windowDependentScaler
                 spawnColor = `rgb(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)},${Math.floor(Math.random() * 255)})`
@@ -251,8 +265,25 @@ function gameTick() {
     updateScoreboard()
 
     //spawn stuff
+    let spawnLogic
     let randomSpawn = [GeneralSpawn, TrackingSpawn]
-    generateSpawn(100, 15, 0.5, randomSpawn[Math.floor(Math.random() * 2)])
+    switch (gameSettings.difficulty){
+        case "Easy":
+            spawnLogic = [200,15,0.3,randomSpawn[0]]
+            break
+        case "Medium":
+            spawnLogic = [125,20,.5,randomSpawn[Math.floor(Math.random() * 2)]]
+            break
+        case "Hard":
+            spawnLogic = [50,20,1,randomSpawn[Math.floor(Math.random() * 2)]]
+            break
+        case "Bananas":
+            spawnLogic = [10,5, 2,randomSpawn[0]]
+            break
+
+    }
+    
+    generateSpawn(spawnLogic[0],spawnLogic[1],spawnLogic[2],spawnLogic[3])
 
     for (let spawn of spawnList) {
         spawn.movement()
@@ -308,7 +339,7 @@ function movementHandlerKeyUp(e) {
 
 //Handle buttonclicks
 function settingClick(e) {
-    console.log('in settings')
+    //console.log('in settings')
     let rosettaSettings = {
         challengeMode: "Challenge Mode",
         infinityMode: "Infinity Mode",
