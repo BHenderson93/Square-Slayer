@@ -25,7 +25,7 @@ class Player {
         this.moveSpeed = .7*windowDependentScaler
         this.radius = gameScaler * .01
         this.pathHistory = []
-        this.jumpBackDist = 350
+        this.jumpBackDist = 250
     }
 
     movement() {
@@ -179,9 +179,23 @@ function generateSpawn(rate, spawnSize, speedScaler, type) {
                 spawnColor = 'red'
                 speedX = -.1
                 speedY = -.1
-                speedScaler = .8*speedScaler
+                switch (gameSettings.difficulty){
+                    case "Easy":
+                        speedScaler = 1.5*speedScaler
+                        break
+                    case "Medium":
+                        speedScaler = 1.3*speedScaler
+                        break
+                    case "Hard":
+                        speedScaler = 2.1*speedScaler
+                        break
+                    case "Bananas":
+                        speedScaler = 1.5*speedScaler
+                        break
+                }
+                    
             } else {
-                gameSettings.difficulty == 'Bananas' ? size =spawnSize*windowDependentScaler : size = (5 + Math.floor(Math.random() * spawnSize))* windowDependentScaler
+                gameSettings.difficulty === 'Bananas' ? size =spawnSize*windowDependentScaler : size = (5 + Math.floor(Math.random() * spawnSize))* windowDependentScaler
                 speedX = (speedScaler * 0.5) - Math.random() * speedScaler*windowDependentScaler
                 speedY = (speedScaler * 0.5) - Math.random() * speedScaler*windowDependentScaler
                 spawnColor = `rgb(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)},${Math.floor(Math.random() * 255)})`
@@ -269,16 +283,16 @@ function gameTick() {
     let randomSpawn = [GeneralSpawn, TrackingSpawn]
     switch (gameSettings.difficulty){
         case "Easy":
-            spawnLogic = [200,15,0.3,randomSpawn[0]]
+            spawnLogic = [200,15,0.5,randomSpawn[0]]
             break
         case "Medium":
-            spawnLogic = [125,20,.5,randomSpawn[Math.floor(Math.random() * 2)]]
+            spawnLogic = [125,15,.5,randomSpawn[Math.floor(Math.random() * 2)]]
             break
         case "Hard":
-            spawnLogic = [50,20,1,randomSpawn[Math.floor(Math.random() * 2)]]
+            spawnLogic = [50,15,0.5,randomSpawn[Math.floor(Math.random() * 2)]]
             break
         case "Bananas":
-            spawnLogic = [10,5, 1.75,randomSpawn[0]]
+            spawnLogic = [10,5, 1,randomSpawn[0]]
             break
     }
     
