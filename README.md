@@ -21,17 +21,12 @@ JavaScript
     Canvas, Keyboard Events
 
 ## Future directions
-
-Instructions display
-Add health
-Animations when hit
-High Score file
-Purple exploding square that emits particles?
-Game speed progression
-Visual displays of squares killed
-Styling layout
-Game Over display
-Styling Rectangles
+Game Over display - squares killed/time alive in postgame.
 READ.ME, other documents
 
-Deselect button after click so that key presses don't reactivate
+
+Styling Rectangles
+High Score file
+Game speed progression
+Purple exploding square that emits particles?
+Styling layout

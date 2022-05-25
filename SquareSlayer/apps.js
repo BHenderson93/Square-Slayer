@@ -90,7 +90,6 @@ class Player {
                     pencil.arc(this.x,this.y,(this.detonateRadius/(this.detonationAnimationDuration/this.detonationAnimationState)), 0 , 2*Math.PI)
                     pencil.fill()
                 }
-                
                 this.detonationAnimationState >= this.detonationAnimationDuration ? this.detonationAnimationState = 0 : null
             }
         
@@ -118,9 +117,9 @@ class Player {
 
     detonate(bool) {
     if (this.detonateTimer === this.detonateCD || bool === true) {
-        console.log(bool)
+        //console.log(bool)
             checkCollisions(this.detonateRadius , 'Detonate')
-            this.detonateTimer = 0
+            bool === true ? null: this.detonateTimer = 0
             this.detonationAnimationState = 1
         }
     }
@@ -294,6 +293,7 @@ function checkCollisions(radius, reason) {
                     player.health--
                     activateHealthDetonate = true
                     console.log('Ouch')
+                    spawnKills.push(spawn)
                 }
                 
             } else if (reason === 'Detonate') {
@@ -318,10 +318,12 @@ function checkCollisions(radius, reason) {
 
 //function to reset the game
 function resetGame() {
+    postgameElements.style.display = 'none';
     clearInterval(gameInterval)
     clearInterval(introInterval)
     player = new Player()
     spawnList = []
+    aliveTime = 0
     spawnKills = []
     score = 0
     scoreModifier = 1
@@ -332,7 +334,7 @@ function resetGame() {
     player.detonateTimer = 0
     player.detonationAnimationState = 0
     nextMove = [0, 0, 1]
-    gameInterval = setInterval(gameTick, 20)
+    gameSettings.mode === 'introMode' ? gameIntro() : gameInterval = setInterval(gameTick, 20)
 }
 
 //function to update scoreboard and track current score
@@ -343,7 +345,7 @@ let scoreBoardMultiplier = document.getElementById('scoreboard-multiplier')
 function updateScoreboard() {
     score += (spawnList.length / 50)*scoreModifier
     scoreBoard.textContent = `Score: ${Math.floor(score)}`
-    console.log(scoreModifier)
+    //console.log(scoreModifier)
     scoreBoardMultiplier.textContent = `Multiplier: ${(Math.round(scoreModifier*100)/100).toFixed(2)}`
     
     //add killed spawn somewhere in score
@@ -351,6 +353,7 @@ function updateScoreboard() {
 
 //Function to advance the game by one 'tick' each 60ms.
 let spawnTimer = 0
+let aliveTime = 0
 //let tSpawn = new TrackingSpawn(10, 0.5, 0.5, .5)
 //spawnList.push(tSpawn)
 function gameTick() {
@@ -360,7 +363,7 @@ function gameTick() {
     player.render()
     checkCollisions(player.radius, 'Death')
     updateScoreboard()
-
+    aliveTime++
     //spawn stuff
     let spawnLogic
     let randomSpawn = [GeneralSpawn, TrackingSpawn]
@@ -448,7 +451,6 @@ function settingClick(e) {
     }
     switch (e.target.id) {
         //game mode selections
-
         case 'challenge-mode':
             gameSettings.mode = 'challengeMode'
             resetGame()
@@ -478,6 +480,7 @@ function settingClick(e) {
         case 'hard-difficulty':
             gameSettings.difficulty = 'Hard'
             resetGame()
+            wasReal = true
             break
         case 'bananas':
             gameSettings.difficulty = 'Fiesta'
@@ -489,60 +492,36 @@ function settingClick(e) {
         player = new Player()
         document.getElementById('current-mode').textContent = rosettaSettings[gameSettings.mode]
         document.getElementById('current-difficulty').textContent = gameSettings.difficulty
-        document.getElementById('gameboard').blur()
+        e.target.blur()
+        document.getElementById('intro-wrapper').style.display = 'none'
     }
 }
 
 function gameIntro (){
-    let introLines = [`Welcome to SquareSlayer!`,
-    `Use arrowkeys to move yourself`,
-    `Press 'd' to Detonate an explosion that kills squares`,
-    `Press 'f' to Jump Back in time to the position shown by the line`,
-    `Press 'spacebar' to Stop Movement`,
-    `Hold 'shift' to Slow Movement speed`,
-    `Press 'r' to reset the game`]
-
-    let gameTips = [ `The more squares you hit with Detonate, the larger the Score Multiplier gain! 2 hit = +0.04, 10 hit = +1`,
-        `Red squares track your location and hunt you. Use Jump Back to juke them out and stay alive!`,
-        `Sometimes the best thing you can do is to dodge instead of run. Try using Slow Movement/Stop Movement to dodge`
-        ]
 
     introInterval = setInterval(()=>{
         pencil.clearRect(0, 0, myCanvas.width, myCanvas.height)
-        pencil.fillStyle = "green"
-        pencil.font = `1000px Arial"`
-        pencil.fontsize = '1000px'
-        let currLine = myCanvas.height/6
-        let lineStart = myCanvas.width/10
-        for(let i = 0; i < introLines.length ; i++){
-            pencil.fillText(introLines[i],lineStart, currLine, `1200`)
-            currLine+=(screenScaleInfo/25)
-        }
-        
-
-       
         player.movement()
         player.render()
     }, 20)
 }
-
+const postgameElements = document.getElementById('postgame-positioner')
 function youDied (){
     //Message displayed over screen
     //Scores and/or other metrics displayed below
     //Hit 'r' to reset, or click button for next game mode.
+    console.log(`You killed ${spawnKills.length} squares. Nice! Total time survived: ${aliveTime/50} seconds!`)
+    postgameElements.style.display = 'block'
 }
 
 //event listeners for keyboard presses and clicks
 document.addEventListener('keydown', movementHandlerKeyDown)
 document.addEventListener('keyup', movementHandlerKeyUp)
-document.getElementById('scoreboard-container').addEventListener('click', (e)=>{
-    //code is a workout to stop 'spacebar' from triggering 'click' to reset the game by reselecting the previously clicked setting
-    console.log(e.pointerId)
-    e.pointerId === 1 ? settingClick(e) : null
-})
+document.getElementById('scoreboard-container').addEventListener('click', settingClick
+)
 
 //resetGame also starts the game by setting the interval.
-let gameSettings = { mode: 'infinityMode', difficulty: 'Easy' }
+let gameSettings = { mode: 'introMode', difficulty: 'Easy' }
 let player = new Player()
 let introInterval, gameInterval
 gameIntro()
