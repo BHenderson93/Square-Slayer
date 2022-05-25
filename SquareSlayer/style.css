@@ -16,6 +16,7 @@ canvas {
 
 h1 {
     text-align: center;
+    margin-bottom: auto;
 }
 
 h2 {
@@ -102,9 +103,7 @@ button {
 }
 
 #postgame-title{
-/*     position: absolute;
-    left: 50%;
-    top: 30%; */
+    margin-bottom: 3vh;;
     display:block;
     width:100%;
     font-size: 8vh;

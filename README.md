@@ -21,11 +21,10 @@ JavaScript
     Canvas, Keyboard Events
 
 ## Future directions
-Game Over display - squares killed/time alive in postgame.
 READ.ME, other documents
 
 
-Styling Rectangles
+Styling Square
 High Score file
 Game speed progression
 Purple exploding square that emits particles?

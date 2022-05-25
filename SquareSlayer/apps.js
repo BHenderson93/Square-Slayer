@@ -378,7 +378,7 @@ function gameTick() {
             spawnLogic = [50, 15, 0.5, randomSpawn[Math.floor(Math.random() * 2)]]
             break
         case "Fiesta":
-            spawnLogic = [6, 5, .75, randomSpawn[Math.floor(Math.random() * 2)]]
+            spawnLogic = [6, 5, .85, randomSpawn[Math.floor(Math.random() * 2)]]
             break
     }
 
