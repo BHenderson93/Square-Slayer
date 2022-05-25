@@ -16,7 +16,7 @@ class Player {
 
     //take in player attributes and construct object.
     constructor(color) {
-        this.health = 10
+        this.health = 3
         this.color = 'rgb(255,0,0)'
         this.x = boardOrigin.x
         this.y = boardOrigin.y
@@ -27,9 +27,9 @@ class Player {
         this.pathHistory = []
         this.jumpBackDist = 250
         this.detonateTimer = 0
-        this.detonateCD = 400
-        gameSettings.difficulty === 'Bananas' ? this.detonateCD=100 :null
-        this.detonateRadius = this.radius * 16
+        this.detonateCD = 250
+        gameSettings.difficulty === 'Fiesta' ? this.detonateCD=100 :null
+        this.detonateRadius = this.radius * 20
         this.detonationAnimationDuration = 12
         this.detonationAnimationState = 0
     }
@@ -104,7 +104,7 @@ class Player {
             this.x = historicState[0]
             this.y = historicState[1]
             this.pathHistory = []
-            gameSettings.mode === 'Bananas' ? this.detonate(true) : null
+            gameSettings.mode === 'Fiesta' ? this.detonate(true) : null
             //console.log(this.x,this.y)
         }
     }
@@ -228,13 +228,13 @@ function generateSpawn(rate, spawnSize, speedScaler, type) {
                     case "Hard":
                         speedScaler = 2.1 * speedScaler
                         break
-                    case "Bananas":
+                    case "Fiesta":
                         speedScaler = 1.5 * speedScaler
                         break
                 }
 
             } else {
-                gameSettings.difficulty === 'Bananas' ? size = spawnSize * windowDependentScaler : size = (5 + Math.floor(Math.random() * spawnSize)) * windowDependentScaler
+                gameSettings.difficulty === 'Fiesta' ? size = spawnSize * windowDependentScaler : size = (5 + Math.floor(Math.random() * spawnSize)) * windowDependentScaler
                 speedX = (speedScaler * 0.5) - Math.random() * speedScaler * windowDependentScaler
                 speedY = (speedScaler * 0.5) - Math.random() * speedScaler * windowDependentScaler
                 spawnColor = `rgb(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)},${Math.floor(Math.random() * 255)})`
@@ -258,7 +258,7 @@ function generateSpawn(rate, spawnSize, speedScaler, type) {
         //generate new spawn based off above gameMode construction logic
         newSpawn = new type(size, speedX, speedY, spawnColor, speedScaler * windowDependentScaler)
         //console.log(newSpawn.radius)
-        if (gameSettings.mode === 'zenMode' || gameSettings.difficulty === 'Bananas') {
+        if (gameSettings.mode === 'zenMode' || gameSettings.difficulty === 'Fiesta') {
             origins = [[0, 0], [myCanvas.width - newSpawn.radius, 0], [0, myCanvas.height - newSpawn.radius], [myCanvas.width - newSpawn.radius, myCanvas.height - newSpawn.radius]]
             newSpawn.x = origins[Math.floor(Math.random() * origins.length)][0]
             newSpawn.y = origins[Math.floor(Math.random() * origins.length)][1]
@@ -273,6 +273,7 @@ function generateSpawn(rate, spawnSize, speedScaler, type) {
 let spawnKills = []
 function checkCollisions(radius, reason) {
     let tempSpawn = []
+    let tempKills = []
     for (let spawn of spawnList) {
         //spawn hit box dimensions include player dimensions so that only player x and y coordinates need to be calculated after.
         let spawnHitBox = { xMin: spawn.x - radius, xMax: spawn.x + spawn.radius + radius, yMin: spawn.y - radius, yMax: spawn.y + spawn.radius + radius }
@@ -285,15 +286,17 @@ function checkCollisions(radius, reason) {
             } else if (reason === 'Detonate') {
                 //remove the spawn if in detonate radius.
                 spawnKills.push(spawn)
+                tempKills.push(spawn)
             }
         } else{
             //if spawns not in hitbox, add them to temp array to readd to spawnlist. Done so that spawn can be removed using checkcollisions function.
             tempSpawn.push(spawn)
         }
-        spawnList=tempSpawn
+        //console.log(scoreModifier)
     }
-
-
+        scoreModifier += ((tempKills.length**2)/100)
+        console.log(scoreModifier, tempKills.length)
+        spawnList=tempSpawn
 }
 
 //function to reset the game
@@ -302,6 +305,7 @@ function resetGame() {
     spawnList = []
     spawnKills = []
     score = 0
+    scoreModifier = 1
     updateScoreboard()
     player.pathHistory = []
     player.x = boardOrigin.x
@@ -314,10 +318,11 @@ function resetGame() {
 
 //function to update scoreboard and track current score
 let score = 0
+let scoreModifier = 1
 let scoreBoard = document.getElementById('scoreboard')
 function updateScoreboard() {
-    gameSettings.difficulty === 'Bananas' ? score=spawnKills.length : score += spawnList.length / 50
-    scoreBoard.textContent = `Score: ${Math.floor(score)}`
+    score += (spawnList.length / 50)*scoreModifier
+    scoreBoard.textContent = `Score: ${Math.floor(score)}\n Multiplier: ${(Math.round(scoreModifier*100)/100).toFixed(2)}`
     //add killed spawn somewhere in score
 }
 
@@ -346,8 +351,8 @@ function gameTick() {
         case "Hard":
             spawnLogic = [50, 15, 0.5, randomSpawn[Math.floor(Math.random() * 2)]]
             break
-        case "Bananas":
-            spawnLogic = [10, 5, 1, randomSpawn[0]]
+        case "Fiesta":
+            spawnLogic = [10, 5, .75, randomSpawn[0]]
             break
     }
 
@@ -444,7 +449,7 @@ function settingClick(e) {
             resetGame()
             break
         case 'bananas':
-            gameSettings.difficulty = 'Bananas'
+            gameSettings.difficulty = 'Fiesta'
             resetGame()
             break
     }
