@@ -15,8 +15,9 @@ class Player {
 
     //take in player attributes and construct object.
     constructor(color) {
-        this.health = 1
-        this.color = 'rgb(255,0,0)'
+        this.health = 3
+        this.color = 'darkgreen'
+        
         this.x = boardOrigin.x
         this.y = boardOrigin.y
         //this.x = boardOrigin.x
@@ -31,6 +32,7 @@ class Player {
         this.detonateRadius = this.radius * 20
         this.detonationAnimationDuration = 12
         this.detonationAnimationState = 0
+        this.healthDetonate = false
     }
 
     movement() {
@@ -50,6 +52,7 @@ class Player {
 
     //draw the player on at the center of the board
     render() {
+        this.health > 2 ? this.color = 'green' : this.health === 2 ? this.color = 'orange' : this.health < 2 ? this.color = 'red' : null
         //console.log(this.pathHistory.length)
         //path history shadow, drawn first so player will overlay if on top.
         if (this.pathHistory.length > this.jumpBackDist / 2) {
@@ -80,8 +83,14 @@ class Player {
             if(this.detonationAnimationState > 0 ){
                 pencil.beginPath()
                 pencil.fillStyle=this.color
-                pencil.arc(this.x,this.y,(this.detonateRadius/(this.detonationAnimationDuration/this.detonationAnimationState)), 0 , 2*Math.PI)
-                pencil.fill()
+                if (this.healthDetonate === true){
+                    pencil.arc(this.x,this.y,(this.detonateRadius/(this.detonationAnimationDuration/this.detonationAnimationState))*2, 0 , 2*Math.PI)
+                    pencil.fill()
+                }else{
+                    pencil.arc(this.x,this.y,(this.detonateRadius/(this.detonationAnimationDuration/this.detonationAnimationState)), 0 , 2*Math.PI)
+                    pencil.fill()
+                }
+                
                 this.detonationAnimationState >= this.detonationAnimationDuration ? this.detonationAnimationState = 0 : null
             }
         
@@ -107,12 +116,9 @@ class Player {
         }
     }
 
-    detonate(boolOverride) {
-        if(boolOverride === true){
-            checkCollisions(this.detonateRadius , 'Detonate')
-            this.detonationAnimationState = 1
-        }
-        else if (this.detonateTimer === this.detonateCD) {
+    detonate(bool) {
+    if (this.detonateTimer === this.detonateCD || bool === true) {
+        console.log(bool)
             checkCollisions(this.detonateRadius , 'Detonate')
             this.detonateTimer = 0
             this.detonationAnimationState = 1
@@ -272,6 +278,7 @@ let spawnKills = []
 function checkCollisions(radius, reason) {
     let tempSpawn = []
     let tempKills = []
+    let activateHealthDetonate = false
     for (let spawn of spawnList) {
         //spawn hit box dimensions include player dimensions so that only player x and y coordinates need to be calculated after.
         let spawnHitBox = { xMin: spawn.x - radius, xMax: spawn.x + spawn.radius + radius, yMin: spawn.y - radius, yMax: spawn.y + spawn.radius + radius }
@@ -285,9 +292,8 @@ function checkCollisions(radius, reason) {
                     youDied()
                 }else{
                     player.health--
-                    checkCollisions(player.detonateRadius*2,'Detonate')
+                    activateHealthDetonate = true
                     console.log('Ouch')
-                    scoreModifier = 1
                 }
                 
             } else if (reason === 'Detonate') {
@@ -304,12 +310,17 @@ function checkCollisions(radius, reason) {
         scoreModifier += ((tempKills.length**2)/100)
         //console.log(scoreModifier, tempKills.length)
         spawnList=tempSpawn
+        if(activateHealthDetonate === true){
+            player.detonate(true)
+            scoreModifier = 1
+        }
 }
 
 //function to reset the game
 function resetGame() {
     clearInterval(gameInterval)
     clearInterval(introInterval)
+    player = new Player()
     spawnList = []
     spawnKills = []
     score = 0
@@ -332,6 +343,7 @@ let scoreBoardMultiplier = document.getElementById('scoreboard-multiplier')
 function updateScoreboard() {
     score += (spawnList.length / 50)*scoreModifier
     scoreBoard.textContent = `Score: ${Math.floor(score)}`
+    console.log(scoreModifier)
     scoreBoardMultiplier.textContent = `Multiplier: ${(Math.round(scoreModifier*100)/100).toFixed(2)}`
     
     //add killed spawn somewhere in score
@@ -404,7 +416,7 @@ function movementHandlerKeyDown(e) {
             player.jumpBack()
             break
         case "d":
-            player.detonate()
+            player.detonate(false)
             break
         case 'Shift':
             nextMove[2] = 0.3
@@ -427,7 +439,7 @@ function movementHandlerKeyUp(e) {
 //Handle buttonclicks
 function settingClick(e) {
     //console.log('in settings')
-    console.log(e)
+    //console.log(e)
     let wasReal = false
     let rosettaSettings = {
         challengeMode: "Challenge Mode",
