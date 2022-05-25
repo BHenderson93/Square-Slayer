@@ -32,7 +32,7 @@ class Player {
         this.detonateRadius = this.radius * 20
         this.detonationAnimationDuration = 12
         this.detonationAnimationState = 0
-        this.healthDetonate = false
+
     }
 
     movement() {
@@ -58,7 +58,7 @@ class Player {
         if (this.pathHistory.length > this.jumpBackDist / 2) {
             //console.log('draw history')
             pencil.beginPath()
-            this.jumpBackDist === this.pathHistory.length ? pencil.fillStyle = 'darkgreen' : pencil.fillStyle = 'blue'
+            this.jumpBackDist === this.pathHistory.length ? pencil.fillStyle = 'purple' : pencil.fillStyle = 'lightblue'
             pencil.arc(this.pathHistory[this.pathHistory.length - 1][0], this.pathHistory[this.pathHistory.length - 1][1], this.radius, 0, 2 * Math.PI)
             pencil.fill()
 
@@ -66,7 +66,7 @@ class Player {
             let prevNode = [this.x, this.y]
             for (let node of this.pathHistory) {
                 pencil.moveTo(prevNode[0], prevNode[1])
-                this.jumpBackDist === this.pathHistory.length ? pencil.strokeStyle = 'darkgreen' : pencil.strokeStyle = 'blue'
+                this.jumpBackDist === this.pathHistory.length ? pencil.strokeStyle = 'purple' : pencil.strokeStyle = 'lightblue'
                 pencil.lineTo(node[0], node[1])
                 pencil.stroke()
                 prevNode = node
@@ -82,15 +82,14 @@ class Player {
             //detonation animation
             if(this.detonationAnimationState > 0 ){
                 pencil.beginPath()
-                pencil.fillStyle=this.color
-                if (this.healthDetonate === true){
-                    pencil.arc(this.x,this.y,(this.detonateRadius/(this.detonationAnimationDuration/this.detonationAnimationState))*2, 0 , 2*Math.PI)
-                    pencil.fill()
-                }else{
+                this.healthDetonate === true ? pencil.fillStyle = 'red' : pencil.fillStyle='darkorange'
+
                     pencil.arc(this.x,this.y,(this.detonateRadius/(this.detonationAnimationDuration/this.detonationAnimationState)), 0 , 2*Math.PI)
                     pencil.fill()
-                }
-                this.detonationAnimationState >= this.detonationAnimationDuration ? this.detonationAnimationState = 0 : null
+                if(this.detonationAnimationState >= this.detonationAnimationDuration ){
+                    this.detonationAnimationState = 0
+                    this.healthDetonate = false
+                } 
             }
         
 
@@ -292,6 +291,7 @@ function checkCollisions(radius, reason) {
                 }else{
                     player.health--
                     activateHealthDetonate = true
+                    player.healthDetonate = true
                     console.log('Ouch')
                     spawnKills.push(spawn)
                 }
@@ -378,7 +378,7 @@ function gameTick() {
             spawnLogic = [50, 15, 0.5, randomSpawn[Math.floor(Math.random() * 2)]]
             break
         case "Fiesta":
-            spawnLogic = [8, 5, .75, randomSpawn[Math.floor(Math.random() * 2)]]
+            spawnLogic = [6, 5, .75, randomSpawn[Math.floor(Math.random() * 2)]]
             break
     }
 
@@ -512,6 +512,9 @@ function youDied (){
     //Hit 'r' to reset, or click button for next game mode.
     console.log(`You killed ${spawnKills.length} squares. Nice! Total time survived: ${aliveTime/50} seconds!`)
     postgameElements.style.display = 'block'
+    document.getElementById('li-score').textContent = `Score: ${Math.floor(score)}`
+    document.getElementById('li-slain').textContent = `Squares Slain: ${spawnKills.length}`
+    document.getElementById('li-time').textContent = `Time Alive: ${Math.floor(aliveTime/50)} seconds`
 }
 
 //event listeners for keyboard presses and clicks
