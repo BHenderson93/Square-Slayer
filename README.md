@@ -28,13 +28,10 @@ Animations when hit
 High Score file
 Purple exploding square that emits particles?
 Game speed progression
-Add score multiplier based off slain squares
 Visual displays of squares killed
 Styling layout
 Game Over display
-Game Name - Square Slayer
 Styling Rectangles
 READ.ME, other documents
-Slight player size up
 
 Deselect button after click so that key presses don't reactivate

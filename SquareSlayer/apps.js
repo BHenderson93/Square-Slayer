@@ -6,7 +6,6 @@ const screenScaleInfo = Math.round(Math.min(window.innerHeight * 2, window.inner
 pencil.canvas.width = screenScaleInfo
 pencil.canvas.height = screenScaleInfo / 2
 const windowDependentScaler = screenScaleInfo / 300
-
 //x and y coordinates for center of the board, as well as gameScalers for screen sizes
 const boardOrigin = { x: myCanvas.width / 2, y: myCanvas.height / 2 }
 const gameScaler = Math.min(myCanvas.width, myCanvas.height)
@@ -28,7 +27,7 @@ class Player {
         this.jumpBackDist = 250
         this.detonateTimer = 0
         this.detonateCD = 250
-        gameSettings.difficulty === 'Fiesta' ? this.detonateCD=150 :null
+        gameSettings.difficulty === 'Fiesta' ? this.detonateCD=50 :null
         this.detonateRadius = this.radius * 20
         this.detonationAnimationDuration = 12
         this.detonationAnimationState = 0
@@ -175,7 +174,7 @@ class GeneralSpawn extends Spawn {
 class TrackingSpawn extends Spawn {
     constructor(radius, dX, dY, color, speed) {
         super(radius, dX, dY, color, speed)
-        this.color = 'red'
+        this.color
     }
     movement() {
         //track the player and follow them after each collision with a wall
@@ -214,7 +213,7 @@ function generateSpawn(rate, spawnSize, speedScaler, type) {
         if (gameSettings.mode === 'infinityMode') {
             if (type === TrackingSpawn) {
                 size = 5 * windowDependentScaler
-                spawnColor = 'red'
+                gameSettings.difficulty === 'Fiesta' ? spawnColor = `rgb(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)},${Math.floor(Math.random() * 255)})` : spawnColor = 'red'
                 speedX = -1*windowDependentScaler
                 speedY = -1*windowDependentScaler
                 switch (gameSettings.difficulty) {
@@ -329,9 +328,12 @@ function resetGame() {
 let score = 0
 let scoreModifier = 1
 let scoreBoard = document.getElementById('scoreboard')
+let scoreBoardMultiplier = document.getElementById('scoreboard-multiplier')
 function updateScoreboard() {
     score += (spawnList.length / 50)*scoreModifier
-    scoreBoard.textContent = `Score: ${Math.floor(score)}\n Multiplier: ${(Math.round(scoreModifier*100)/100).toFixed(2)}`
+    scoreBoard.textContent = `Score: ${Math.floor(score)}`
+    scoreBoardMultiplier.textContent = `Multiplier: ${(Math.round(scoreModifier*100)/100).toFixed(2)}`
+    
     //add killed spawn somewhere in score
 }
 
@@ -361,7 +363,7 @@ function gameTick() {
             spawnLogic = [50, 15, 0.5, randomSpawn[Math.floor(Math.random() * 2)]]
             break
         case "Fiesta":
-            spawnLogic = [10, 5, .75, randomSpawn[0]]
+            spawnLogic = [8, 5, .75, randomSpawn[Math.floor(Math.random() * 2)]]
             break
     }
 
@@ -425,6 +427,7 @@ function movementHandlerKeyUp(e) {
 //Handle buttonclicks
 function settingClick(e) {
     //console.log('in settings')
+    console.log(e)
     let wasReal = false
     let rosettaSettings = {
         challengeMode: "Challenge Mode",
@@ -433,6 +436,7 @@ function settingClick(e) {
     }
     switch (e.target.id) {
         //game mode selections
+
         case 'challenge-mode':
             gameSettings.mode = 'challengeMode'
             resetGame()
@@ -473,28 +477,38 @@ function settingClick(e) {
         player = new Player()
         document.getElementById('current-mode').textContent = rosettaSettings[gameSettings.mode]
         document.getElementById('current-difficulty').textContent = gameSettings.difficulty
+        document.getElementById('gameboard').blur()
     }
-    
 }
 
 function gameIntro (){
+    let introLines = [`Welcome to SquareSlayer!`,
+    `Use arrowkeys to move yourself`,
+    `Press 'd' to Detonate an explosion that kills squares`,
+    `Press 'f' to Jump Back in time to the position shown by the line`,
+    `Press 'spacebar' to Stop Movement`,
+    `Hold 'shift' to Slow Movement speed`,
+    `Press 'r' to reset the game`]
+
+    let gameTips = [ `The more squares you hit with Detonate, the larger the Score Multiplier gain! 2 hit = +0.04, 10 hit = +1`,
+        `Red squares track your location and hunt you. Use Jump Back to juke them out and stay alive!`,
+        `Sometimes the best thing you can do is to dodge instead of run. Try using Slow Movement/Stop Movement to dodge`
+        ]
+
     introInterval = setInterval(()=>{
         pencil.clearRect(0, 0, myCanvas.width, myCanvas.height)
-        pencil.fillStyle="green"
-        pencil.font = "bold 32px Arial"
-        pencil.fillText(`Welcome to SquareSlayer!\n
-        Use arrowkeys to move yourself\n
-        Press 'd' to Detonate an explosion that kills squares.\n
-        Press 'f' to Jump Back in time to the position shown by the line\n
-        Press 'spacebar' to Stop Movement\n
-        Hold 'shift' to Slow Movement speed\n
-        Press 'r' to reset the game\n
+        pencil.fillStyle = "green"
+        pencil.font = `1000px Arial"`
+        pencil.fontsize = '1000px'
+        let currLine = myCanvas.height/6
+        let lineStart = myCanvas.width/10
+        for(let i = 0; i < introLines.length ; i++){
+            pencil.fillText(introLines[i],lineStart, currLine, `1200`)
+            currLine+=(screenScaleInfo/25)
+        }
+        
 
-        The more squares you hit with Detonate, the larger the Score Multiplier gain! 2 hit = +0.04, 10 hit = +1 \n
-        Red squares track your location and hunt you. Use Jump Back to juke them out and stay alive!
-        Sometimes the best thing you can do is to dodge instead of run. Try using Slow Movement/Stop Movement to dodge.
-        `
-        ,myCanvas.width/2,myCanvas.height/4)
+       
         player.movement()
         player.render()
     }, 20)
@@ -509,7 +523,11 @@ function youDied (){
 //event listeners for keyboard presses and clicks
 document.addEventListener('keydown', movementHandlerKeyDown)
 document.addEventListener('keyup', movementHandlerKeyUp)
-document.getElementById('scoreboard-container').addEventListener('click', settingClick)
+document.getElementById('scoreboard-container').addEventListener('click', (e)=>{
+    //code is a workout to stop 'spacebar' from triggering 'click' to reset the game by reselecting the previously clicked setting
+    console.log(e.pointerId)
+    e.pointerId === 1 ? settingClick(e) : null
+})
 
 //resetGame also starts the game by setting the interval.
 let gameSettings = { mode: 'infinityMode', difficulty: 'Easy' }
