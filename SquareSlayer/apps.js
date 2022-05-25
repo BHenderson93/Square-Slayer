@@ -1,4 +1,4 @@
-console.log('apps.js synced')
+//console.log('apps.js synced')
 
 let myCanvas = document.getElementById('gameboard')
 let pencil = myCanvas.getContext('2d')
@@ -16,7 +16,7 @@ class Player {
 
     //take in player attributes and construct object.
     constructor(color) {
-        this.health = 3
+        this.health = 1
         this.color = 'rgb(255,0,0)'
         this.x = boardOrigin.x
         this.y = boardOrigin.y
@@ -28,7 +28,7 @@ class Player {
         this.jumpBackDist = 250
         this.detonateTimer = 0
         this.detonateCD = 250
-        gameSettings.difficulty === 'Fiesta' ? this.detonateCD=100 :null
+        gameSettings.difficulty === 'Fiesta' ? this.detonateCD=150 :null
         this.detonateRadius = this.radius * 20
         this.detonationAnimationDuration = 12
         this.detonationAnimationState = 0
@@ -56,7 +56,7 @@ class Player {
         if (this.pathHistory.length > this.jumpBackDist / 2) {
             //console.log('draw history')
             pencil.beginPath()
-            this.jumpBackDist === this.pathHistory.length ? pencil.strokeStyle = 'darkgreen' : pencil.strokeStyle = 'blue'
+            this.jumpBackDist === this.pathHistory.length ? pencil.fillStyle = 'darkgreen' : pencil.fillStyle = 'blue'
             pencil.arc(this.pathHistory[this.pathHistory.length - 1][0], this.pathHistory[this.pathHistory.length - 1][1], this.radius, 0, 2 * Math.PI)
             pencil.fill()
 
@@ -64,16 +64,16 @@ class Player {
             let prevNode = [this.x, this.y]
             for (let node of this.pathHistory) {
                 pencil.moveTo(prevNode[0], prevNode[1])
-                this.jumpBackDist === this.pathHistory.length ? pencil.fillStyle = 'darkgreen' : pencil.fillStyle = 'blue'
+                this.jumpBackDist === this.pathHistory.length ? pencil.strokeStyle = 'darkgreen' : pencil.strokeStyle = 'blue'
                 pencil.lineTo(node[0], node[1])
                 pencil.stroke()
                 prevNode = node
             }
-
+        }
             //show detonate radius
             if (this.detonateTimer === this.detonateCD){
                 pencil.beginPath()
-                pencil.strokeStyle = 'darkgreen' 
+                pencil.strokeStyle = 'darkorange' 
                 pencil.arc(this.x,this.y,this.detonateRadius,0,2*Math.PI)
                 pencil.stroke()
             }
@@ -85,12 +85,12 @@ class Player {
                 pencil.fill()
                 this.detonationAnimationState >= this.detonationAnimationDuration ? this.detonationAnimationState = 0 : null
             }
-        }
+        
 
         //Central player
         pencil.beginPath()
         pencil.fillStyle = this.color
-        pencil.arc(this.x, this.y, this.radius, 0, 2 * Math.PI)
+        pencil.arc(this.x, this.y, this.radius*1.2, 0, 2 * Math.PI)
         pencil.fill()
     }
 
@@ -104,7 +104,6 @@ class Player {
             this.x = historicState[0]
             this.y = historicState[1]
             this.pathHistory = []
-            gameSettings.mode === 'Fiesta' ? this.detonate(true) : null
             //console.log(this.x,this.y)
         }
     }
@@ -216,8 +215,8 @@ function generateSpawn(rate, spawnSize, speedScaler, type) {
             if (type === TrackingSpawn) {
                 size = 5 * windowDependentScaler
                 spawnColor = 'red'
-                speedX = -.1
-                speedY = -.1
+                speedX = -1*windowDependentScaler
+                speedY = -1*windowDependentScaler
                 switch (gameSettings.difficulty) {
                     case "Easy":
                         speedScaler = 1.5 * speedScaler
@@ -258,11 +257,11 @@ function generateSpawn(rate, spawnSize, speedScaler, type) {
         //generate new spawn based off above gameMode construction logic
         newSpawn = new type(size, speedX, speedY, spawnColor, speedScaler * windowDependentScaler)
         //console.log(newSpawn.radius)
-        if (gameSettings.mode === 'zenMode' || gameSettings.difficulty === 'Fiesta') {
+        
             origins = [[0, 0], [myCanvas.width - newSpawn.radius, 0], [0, myCanvas.height - newSpawn.radius], [myCanvas.width - newSpawn.radius, myCanvas.height - newSpawn.radius]]
             newSpawn.x = origins[Math.floor(Math.random() * origins.length)][0]
             newSpawn.y = origins[Math.floor(Math.random() * origins.length)][1]
-        }
+        
         spawnList.push(newSpawn)
     } else {
         spawnTimer++
@@ -280,9 +279,18 @@ function checkCollisions(radius, reason) {
         //console.log(spawnHitBox)
         if (player.x < spawnHitBox.xMax && player.x > spawnHitBox.xMin && player.y > spawnHitBox.yMin && player.y < spawnHitBox.yMax) {
             if (reason === 'Death') {
-                console.log(`You've been hit!`)
-                clearInterval(gameInterval)
-                tempSpawn.push(spawn)
+                if(player.health === 1){
+                    console.log(`You've been hit!`)
+                    clearInterval(gameInterval)
+                    tempSpawn.push(spawn)
+                    youDied()
+                }else{
+                    player.health--
+                    checkCollisions(player.detonateRadius*2,'Detonate')
+                    console.log('Ouch')
+                    scoreModifier = 1
+                }
+                
             } else if (reason === 'Detonate') {
                 //remove the spawn if in detonate radius.
                 spawnKills.push(spawn)
@@ -295,13 +303,14 @@ function checkCollisions(radius, reason) {
         //console.log(scoreModifier)
     }
         scoreModifier += ((tempKills.length**2)/100)
-        console.log(scoreModifier, tempKills.length)
+        //console.log(scoreModifier, tempKills.length)
         spawnList=tempSpawn
 }
 
 //function to reset the game
 function resetGame() {
     clearInterval(gameInterval)
+    clearInterval(introInterval)
     spawnList = []
     spawnKills = []
     score = 0
@@ -416,6 +425,7 @@ function movementHandlerKeyUp(e) {
 //Handle buttonclicks
 function settingClick(e) {
     //console.log('in settings')
+    let wasReal = false
     let rosettaSettings = {
         challengeMode: "Challenge Mode",
         infinityMode: "Infinity Mode",
@@ -426,23 +436,28 @@ function settingClick(e) {
         case 'challenge-mode':
             gameSettings.mode = 'challengeMode'
             resetGame()
+            wasReal = true
             break
         case 'infinity-mode':
             gameSettings.mode = 'infinityMode'
             resetGame()
+            wasReal = true
             break
         case 'zen-mode':
             gameSettings.mode = 'zenMode'
             resetGame()
+            wasReal = true
             break
         //difficulty selections
         case 'easy-difficulty':
             gameSettings.difficulty = 'Easy'
             resetGame()
+            wasReal = true
             break
         case 'medium-difficulty':
             gameSettings.difficulty = 'Medium'
             resetGame()
+            wasReal = true
             break
         case 'hard-difficulty':
             gameSettings.difficulty = 'Hard'
@@ -451,11 +466,44 @@ function settingClick(e) {
         case 'bananas':
             gameSettings.difficulty = 'Fiesta'
             resetGame()
+            wasReal = true
             break
     }
-    player = new Player()
-    document.getElementById('current-mode').textContent = rosettaSettings[gameSettings.mode]
-    document.getElementById('current-difficulty').textContent = gameSettings.difficulty
+    if(wasReal){
+        player = new Player()
+        document.getElementById('current-mode').textContent = rosettaSettings[gameSettings.mode]
+        document.getElementById('current-difficulty').textContent = gameSettings.difficulty
+    }
+    
+}
+
+function gameIntro (){
+    introInterval = setInterval(()=>{
+        pencil.clearRect(0, 0, myCanvas.width, myCanvas.height)
+        pencil.fillStyle="green"
+        pencil.font = "bold 32px Arial"
+        pencil.fillText(`Welcome to SquareSlayer!\n
+        Use arrowkeys to move yourself\n
+        Press 'd' to Detonate an explosion that kills squares.\n
+        Press 'f' to Jump Back in time to the position shown by the line\n
+        Press 'spacebar' to Stop Movement\n
+        Hold 'shift' to Slow Movement speed\n
+        Press 'r' to reset the game\n
+
+        The more squares you hit with Detonate, the larger the Score Multiplier gain! 2 hit = +0.04, 10 hit = +1 \n
+        Red squares track your location and hunt you. Use Jump Back to juke them out and stay alive!
+        Sometimes the best thing you can do is to dodge instead of run. Try using Slow Movement/Stop Movement to dodge.
+        `
+        ,myCanvas.width/2,myCanvas.height/4)
+        player.movement()
+        player.render()
+    }, 20)
+}
+
+function youDied (){
+    //Message displayed over screen
+    //Scores and/or other metrics displayed below
+    //Hit 'r' to reset, or click button for next game mode.
 }
 
 //event listeners for keyboard presses and clicks
@@ -464,7 +512,8 @@ document.addEventListener('keyup', movementHandlerKeyUp)
 document.getElementById('scoreboard-container').addEventListener('click', settingClick)
 
 //resetGame also starts the game by setting the interval.
-let gameSettings = { mode: 'zenMode', difficulty: 'Easy' }
+let gameSettings = { mode: 'infinityMode', difficulty: 'Easy' }
 let player = new Player()
-player.render()
-let gameInterval = setInterval(gameTick, 20)
+let introInterval, gameInterval
+gameIntro()
+//setInterval(gameTick, 20)

@@ -23,13 +23,11 @@ JavaScript
 ## Future directions
 
 Instructions display
-Remove challenge rounds
 Add health
 Animations when hit
 High Score file
 Purple exploding square that emits particles?
 Game speed progression
-Have squares spawn from all corners
 Add score multiplier based off slain squares
 Visual displays of squares killed
 Styling layout
@@ -38,3 +36,5 @@ Game Name - Square Slayer
 Styling Rectangles
 READ.ME, other documents
 Slight player size up
+
+Deselect button after click so that key presses don't reactivate
