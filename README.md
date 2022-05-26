@@ -10,7 +10,7 @@ As a gamer, I want to have fun playing a real-time game that challenges me. Too 
 1. HTML
 2. CSS
 3. JavaScript
-*   Logic, DOM Manipulation, Keyboard Events
+*   Logic, DOM Manipulation, Responsive to User Inputs
 4. Canvas
 
 ## Future Buildout Directions
@@ -23,10 +23,10 @@ As a gamer, I want to have fun playing a real-time game that challenges me. Too 
 ## Game Buildout Progression
 - [x] Gameboard constructed using Canvas element.
 - [x] Player rendering on Canvas.
-- [x] Player able to move using arrowkeys, shift, spacebar.
+- [x] Player able to move using arrowkeys, shift, and spacebar.
 - [x] New Square Class added - Simple Squares bounce as expected upon collision with border.
 - [x] Player/Square collision logic implemented.
-- [x] Score tracking and display implemented (1 score per Square per gametick).
+- [x] Score tracking and display implemented (1 score per square per gametick).
 - [x] Canvas element and game dynamics scale to player screen size.
 - [x] Player Jump Back ability added. Path history drawn, with "echo" of player following.
 - [x] New Square Class added - Tracking Squares aim at player on border collision.
@@ -35,7 +35,7 @@ As a gamer, I want to have fun playing a real-time game that challenges me. Too 
 - [x] Implemented new square spawn logic for each game mode and difficulty.
 - [x] Quick reset 'r' added for fast restarts.
 - [x] Player Detonate ability added.
-- [x] Score multiplier introduced to reward Square Slaying (increases by (Detonate kills)^2).
+- [x] Score multiplier introduced to reward Square Slaying. Increases by ((Detonate kills)^2)/100.
 - [x] Scoring logic updated to include slain squares.
 - [x] Player health stat added. Default set to 3.
 - [x] Player health regen added. Default set to 20s.
