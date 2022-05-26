@@ -1,3 +1,8 @@
+@import url('https://fonts.googleapis.com/css2?family=Metal+Mania&display=swap');
+@font-face{
+    font-family: "Brutal";
+    src: url("Brutalworld-owxEa.ttf") ;
+}
 body {
     width: 100vw;
     height: 100vh;
@@ -6,7 +11,9 @@ body {
     justify-content: center;
     align-items: center;
 }
-
+div{
+    margin:0;
+}
 canvas {
     width: 75vw;
     height: 90vh;
@@ -51,10 +58,17 @@ button {
     height: 100%;
     font-size: 2.5vh;
 }
+span{
+    font-family: 'Metal Mania', cursive;
+}
 
 .intro {
     margin: 0;
     border: 0;
+}
+.stat{
+    font-size: 8vh;
+    margin:3vh;
 }
 
 #intro-wrapper {
@@ -103,10 +117,10 @@ button {
     display:flex;
     flex-flow:column nowrap;
     position:relative;
+    font-size: 8vh;
 }
 
 #postgame-title{
-    margin-bottom: 3vh;;
     display:block;
     width:100%;
     font-size: 8vh;
@@ -132,4 +146,16 @@ margin-bottom: 3vh;
 #current-difficulty {
     text-decoration: none;
     text-align: center;
+}
+#brutal{
+    font-family: "Brutal" , "Arial" , sans-serif;
+    font-size: 13vh;
+}
+#press-r{
+    margin-top: 3vh;
+    font-size: 10vh;
+}
+
+#game-title{
+    font-size:13vh;
 }
