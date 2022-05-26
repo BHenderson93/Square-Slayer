@@ -13,9 +13,32 @@ As a gamer, I want to have fun playing a real-time game that challenges me. Too 
 *   Logic, DOM Manipulation, Keyboard Events
 4. Canvas
 
-## Future Directions
+## Future Buildout Directions
 1. High Score file.
 2. New purple exploding square that sends small fragment squares bouncing around briefly.
 3. New giant real-time tracking square that is fast in X component and too slow in the Y component (overshoots), like a charging bull.
 4. Power-ups that reduce cooldown on abilities or increase player stats.
 5. Alternative styling with borders and gradients.
+
+## Game Buildout Progression
+[x] Gameboard constructed using Canvas element.
+[x] Player rendering on Canvas.
+[x] Player able to move using arrowkeys, shift, spacebar.
+[x] New Square Class added - Simple Squares bounce as expected upon collision with border.
+[x] Player/Square collision logic implemented.
+[x] Score tracking and display implemented (1 score per Square per gametick).
+[x] Canvas element and game dynamics scale to player screen size.
+[x] Player Jump Back ability added. Path history drawn, with "echo" of player following.
+[x] New Square Class added - Tracking Squares aim at player on border collision.
+[x] Classes of squares given color for player identification.
+[x] Zen Mode and Game Difficulty options available.
+[x] Implemented new square spawn logic for each game mode and difficulty.
+[x] Quick reset 'r' added for fast restarts.
+[x] Player Detonate ability added.
+[x] Score multiplier introduced to reward Square Slaying (increases by (Detonate kills)^2).
+[x] Scoring logic updated to include slain squares.
+[x] Player health stat added. Default set to 3.
+[x] Player health regen added. Default set to 20s.
+[x] Constructed Introduction mode with game instructions.
+[x] Constructed death transition to display post-game stats.
+[x] Added game speed and square spawn rate scaling as a function of game time (start slow, end fast).
