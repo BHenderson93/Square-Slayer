@@ -14,11 +14,11 @@ As a gamer, I want to have fun playing a real-time game that challenges me. Too 
 4. Canvas
 
 ## Future Buildout Directions
-1. High Score file.
-2. New purple exploding square that sends small fragment squares bouncing around briefly.
-3. New giant real-time tracking square that is fast in X component and too slow in the Y component (overshoots), like a charging bull.
-4. Power-ups that reduce cooldown on abilities or increase player stats.
-5. Alternative styling with borders and gradients.
+- [] High Score file.
+- [] New purple exploding square that sends small fragment squares bouncing around briefly.
+- [] New giant real-time tracking square that is fast in X component and too slow in the Y component (overshoots), like a charging bull.
+- [] Power-ups that reduce cooldown on abilities or increase player stats.
+- [] Alternative styling with borders and gradients.
 
 ## Game Buildout Progression
 - [x] Gameboard constructed using Canvas element.
