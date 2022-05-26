@@ -1,7 +1,7 @@
 # Square Slayer
 
 ## Premise
-This game is about survival as much as it's about Slaying Squares. Use arrowkeys to dodge squares and position yourself, or use an ability if the time is right. The more squares you slay without taking damage, the higher your multiplier. Hit multiple squares with a single ability to get a much larger multiplier gain. Every square slain is a win - take as many down with you as you can. How long can you survive? How many squares can you slay before they slay you?
+This game is about survival as much as it is about Slaying Squares. Use arrowkeys to dodge squares and position yourself, or use an ability if the time is right. The more squares you slay without taking damage, the higher your multiplier. Hit multiple squares with a single ability to get a much larger multiplier gain. Every square slain is a win - take as many down with you as you can. How long can you survive? How many squares can you slay before they slay you?
 
 ## User Story   
 As a user, I want to be able to select a game mode and play using various forms of movement through the game. 
