@@ -1,4 +1,4 @@
-//console.log('apps.js synced')
+console.log('apps.js synced')
 
 let myCanvas = document.getElementById('gameboard')
 let pencil = myCanvas.getContext('2d')
