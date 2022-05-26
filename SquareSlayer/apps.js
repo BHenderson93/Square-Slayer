@@ -15,9 +15,11 @@ class Player {
 
     //take in player attributes and construct object.
     constructor(color) {
+        this.healthMax = 3
         this.health = 3
+        this.regenTimer = 0
+        this.regenRate = 1000
         this.color = 'darkgreen'
-        
         this.x = boardOrigin.x
         this.y = boardOrigin.y
         //this.x = boardOrigin.x
@@ -25,7 +27,7 @@ class Player {
         this.moveSpeed = .7 * windowDependentScaler
         this.radius = gameScaler * .01
         this.pathHistory = []
-        this.jumpBackDist = 250
+        gameSettings.difficulty === 'Fiesta' ? this.jumpBackDist = 150 : this.jumpBackDist = 250
         this.detonateTimer = 0
         this.detonateCD = 250
         gameSettings.difficulty === 'Fiesta' ? this.detonateCD=50 :null
@@ -48,8 +50,14 @@ class Player {
         //also add 1 to detonate timer for it's cooldown
         this.detonateTimer < this.detonateCD ? this.detonateTimer += 1 : null
         this.detonationAnimationState > 0 ? this.detonationAnimationState++ : null
-    }
 
+        //add 1 to regen timer to give player health back.
+        this.health < this.healthMax ? this.regenTimer++ : null
+        if(this.regenTimer === this.regenRate){
+            this.health++
+            this.regenTimer = 0
+        }
+    }
     //draw the player on at the center of the board
     render() {
         this.health > 2 ? this.color = 'green' : this.health === 2 ? this.color = 'orange' : this.health < 2 ? this.color = 'red' : null
@@ -211,34 +219,21 @@ function generateSpawn(rate, spawnSize, speedScaler, type) {
     //console.log(spawnTimer)
     let size, speedX, speedY, newSpawn, spawnColor
     if (spawnTimer > rate) {
-
         spawnTimer = 0
+        gameSettings.difficulty === 'Fiesta' ? spawnRateScaler+=0.001 : spawnRateScaler += 0.005
         //spawn rules for infinity mode
         if (gameSettings.mode === 'infinityMode') {
             if (type === TrackingSpawn) {
                 size = 5 * windowDependentScaler
+                //spawnColor = `rgb(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)},${Math.floor(Math.random() * 255)})`
                 gameSettings.difficulty === 'Fiesta' ? spawnColor = `rgb(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)},${Math.floor(Math.random() * 255)})` : spawnColor = 'red'
-                speedX = -1*windowDependentScaler
-                speedY = -1*windowDependentScaler
-                switch (gameSettings.difficulty) {
-                    case "Easy":
-                        speedScaler = 1.5 * speedScaler
-                        break
-                    case "Medium":
-                        speedScaler = 1.3 * speedScaler
-                        break
-                    case "Hard":
-                        speedScaler = 2.1 * speedScaler
-                        break
-                    case "Fiesta":
-                        speedScaler = 1.5 * speedScaler
-                        break
-                }
+                speedX = -1*speedScaler*windowDependentScaler
+                speedY = -1*speedScaler*windowDependentScaler
 
             } else {
                 gameSettings.difficulty === 'Fiesta' ? size = spawnSize * windowDependentScaler : size = (5 + Math.floor(Math.random() * spawnSize)) * windowDependentScaler
-                speedX = (speedScaler * 0.5) - Math.random() * speedScaler * windowDependentScaler
-                speedY = (speedScaler * 0.5) - Math.random() * speedScaler * windowDependentScaler
+                speedX = ((speedScaler * 0.5) - (Math.random() * speedScaler * windowDependentScaler))/2
+                speedY = ((speedScaler * 0.5) - (Math.random() * speedScaler * windowDependentScaler))/2
                 spawnColor = `rgb(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)},${Math.floor(Math.random() * 255)})`
             }
         }
@@ -322,6 +317,7 @@ function resetGame() {
     clearInterval(gameInterval)
     clearInterval(introInterval)
     player = new Player()
+    spawnRateScaler = 1
     spawnList = []
     aliveTime = 0
     spawnKills = []
@@ -343,7 +339,7 @@ let scoreModifier = 1
 let scoreBoard = document.getElementById('scoreboard')
 let scoreBoardMultiplier = document.getElementById('scoreboard-multiplier')
 function updateScoreboard() {
-    score += (spawnList.length / 50)*scoreModifier
+    score += ((spawnList.length+spawnKills.length) / 50)*scoreModifier
     scoreBoard.textContent = `Score: ${Math.floor(score)}`
     //console.log(scoreModifier)
     scoreBoardMultiplier.textContent = `Multiplier: ${(Math.round(scoreModifier*100)/100).toFixed(2)}`
@@ -354,6 +350,7 @@ function updateScoreboard() {
 //Function to advance the game by one 'tick' each 60ms.
 let spawnTimer = 0
 let aliveTime = 0
+let spawnRateScaler = 1
 //let tSpawn = new TrackingSpawn(10, 0.5, 0.5, .5)
 //spawnList.push(tSpawn)
 function gameTick() {
@@ -365,20 +362,22 @@ function gameTick() {
     updateScoreboard()
     aliveTime++
     //spawn stuff
+    spawnRateScaler = Math.round(spawnRateScaler*1000)/1000
+    //console.log(spawnRateScaler)
     let spawnLogic
     let randomSpawn = [GeneralSpawn, TrackingSpawn]
     switch (gameSettings.difficulty) {
         case "Easy":
-            spawnLogic = [200, 15, 0.5, randomSpawn[0]]
+            spawnLogic = [200/spawnRateScaler, 15, 0.3, randomSpawn[0]]
             break
         case "Medium":
-            spawnLogic = [125, 15, .5, randomSpawn[Math.floor(Math.random() * 2)]]
+            spawnLogic = [125/spawnRateScaler, 15, .3+(spawnRateScaler/4), randomSpawn[Math.floor(Math.random() * 2)]]
             break
         case "Hard":
-            spawnLogic = [50, 15, 0.5, randomSpawn[Math.floor(Math.random() * 2)]]
+            spawnLogic = [50/spawnRateScaler, 15, 0.5+(spawnRateScaler/4), randomSpawn[Math.floor(Math.random() * 2)]]
             break
         case "Fiesta":
-            spawnLogic = [6, 5, .85, randomSpawn[Math.floor(Math.random() * 2)]]
+            spawnLogic = [10/spawnRateScaler, 5, .5+(spawnRateScaler/4), randomSpawn[Math.floor(Math.random() * 2)]]
             break
     }
 
@@ -421,7 +420,7 @@ function movementHandlerKeyDown(e) {
         case "d":
             player.detonate(false)
             break
-        case 'Shift':
+        case 's':
             nextMove[2] = 0.3
             break
         case 'r':
@@ -434,7 +433,7 @@ function movementHandlerKeyDown(e) {
 function movementHandlerKeyUp(e) {
     //console.log(e.key)
     switch (e.key) {
-        case 'Shift':
+        case 's':
             nextMove[2] = 1
     }
 }
@@ -514,7 +513,7 @@ function youDied (){
     postgameElements.style.display = 'block'
     document.getElementById('li-score').textContent = `Score: ${Math.floor(score)}`
     document.getElementById('li-slain').textContent = `Squares Slain: ${spawnKills.length}`
-    document.getElementById('li-time').textContent = `Time Alive: ${Math.floor(aliveTime/50)} seconds`
+    document.getElementById('li-time').textContent = `Time Alive: ${Math.round(Math.floor(aliveTime/50))} seconds`
 }
 
 //event listeners for keyboard presses and clicks

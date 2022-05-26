@@ -23,9 +23,7 @@ JavaScript
 ## Future directions
 READ.ME, other documents
 
-
 Styling Square
 High Score file
-Game speed progression
 Purple exploding square that emits particles?
 Styling layout
