@@ -24,7 +24,7 @@ class Player {
         this.y = boardOrigin.y
         //this.x = boardOrigin.x
         //this.y = boardOrigin.y
-        this.moveSpeed = .7 * windowDependentScaler
+        this.moveSpeed = .9 * windowDependentScaler
         this.radius = gameScaler * .01
         this.pathHistory = []
         gameSettings.difficulty === 'Fiesta' ? this.jumpBackDist = 150 : this.jumpBackDist = 250
@@ -34,6 +34,7 @@ class Player {
         this.detonateRadius = this.radius * 20
         this.detonationAnimationDuration = 12
         this.detonationAnimationState = 0
+        this.dead = false
 
     }
 
@@ -288,6 +289,9 @@ function checkCollisions(radius, reason) {
                     console.log(`You've been hit!`)
                     clearInterval(gameInterval)
                     tempSpawn.push(spawn)
+                    spawn.dX = 0
+                    spawn.dY = 0
+                    spawn.speed = 0
                     youDied()
                 } else {
                     player.health--
@@ -319,7 +323,9 @@ function checkCollisions(radius, reason) {
 
 //function to reset the game
 function resetGame() {
+    player.dead = false
     postgameElements.style.display = 'none';
+    clearInterval(postgameMovement)
     clearInterval(gameInterval)
     clearInterval(introInterval)
     player = new Player()
@@ -421,13 +427,13 @@ function movementHandlerKeyDown(e) {
             nextMove = [0, 0, 1]
             break
         case "f":
-            gameSettings.mode === 'zenMode' ? null : player.jumpBack()
+            player.dead === true ? null : gameSettings.mode === 'zenMode' ? null : player.jumpBack()
             break
         case "d":
-            gameSettings.mode === 'zenMode' ? null : player.detonate(false)
+            player.dead === true ? null : gameSettings.mode === 'zenMode' ? null : player.detonate(false)
             break
         case 'Shift':
-            nextMove[2] = 0.3
+            nextMove[2] = 0.4
             break
         case 'r':
             resetGame()
@@ -511,6 +517,7 @@ function gameIntro() {
     }, 20)
 }
 const postgameElements = document.getElementById('postgame-positioner')
+let postgameMovement
 function youDied() {
     //Message displayed over screen
     //Scores and/or other metrics displayed below
@@ -520,6 +527,45 @@ function youDied() {
     document.getElementById('li-score').textContent = `Score: ${Math.floor(score)}`
     document.getElementById('li-slain').textContent = `Squares Slain: ${spawnKills.length}`
     document.getElementById('li-time').textContent = `Time Alive: ${Math.round(Math.floor(aliveTime / 50))} seconds`
+    player.dead = true
+    for (let spawn of spawnList) {
+        spawn.speed=spawn.speed*0.3
+        spawn.dX = spawn.dX*0.3
+        spawn.dY=spawn.dY*0.3
+    }
+
+    const squareMovements=()=>{
+        pencil.clearRect(0, 0, myCanvas.width, myCanvas.height)
+        player.render()
+        
+        spawnRateScaler = 1
+        //console.log(spawnRateScaler)
+        let spawnLogic
+        let randomSpawn = [GeneralSpawn, TrackingSpawn]
+        if (spawnList.length < 2000) {
+            switch (gameSettings.difficulty) {
+                case "Easy":
+                    spawnLogic = [200 / spawnRateScaler, 15, 0.3, randomSpawn[0]]
+                    break
+                case "Medium":
+                    spawnLogic = [125 / spawnRateScaler, 15, .3 + (spawnRateScaler / 4), randomSpawn[Math.floor(Math.random() * 2)]]
+                    break
+                case "Hard":
+                    spawnLogic = [50 / spawnRateScaler, 15, 0.5 + (spawnRateScaler / 4), randomSpawn[Math.floor(Math.random() * 2)]]
+                    break
+                case "Fiesta":
+                    spawnLogic = [10 / spawnRateScaler, 5, .5 + (spawnRateScaler / 4), randomSpawn[Math.floor(Math.random() * 2)]]
+                    break
+            }
+            generateSpawn(spawnLogic[0], spawnLogic[1], spawnLogic[2]*.3, spawnLogic[3])
+        }
+        for (let spawn of spawnList) {
+            spawn.movement()
+            spawn.render()
+        }
+    }
+    postgameMovement = setInterval(squareMovements , 20)
+
 }
 
 //event listeners for keyboard presses and clicks
