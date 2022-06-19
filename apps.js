@@ -1,12 +1,12 @@
 console.log('apps.js synced')
 
+//Screen scaling and canvas variables
 let myCanvas = document.getElementById('gameboard')
 let pencil = myCanvas.getContext('2d')
 const screenScaleInfo = Math.round(Math.min(window.innerHeight * 2, window.innerWidth) / 100) * 100
 pencil.canvas.width = screenScaleInfo
 pencil.canvas.height = screenScaleInfo / 2
 const windowDependentScaler = screenScaleInfo / 300
-//x and y coordinates for center of the board, as well as gameScalers for screen sizes
 const boardOrigin = { x: myCanvas.width / 2, y: myCanvas.height / 2 }
 const gameScaler = Math.min(myCanvas.width, myCanvas.height)
 
@@ -24,8 +24,6 @@ class Player {
         this.color = 'darkgreen'
         this.x = boardOrigin.x
         this.y = boardOrigin.y
-        //this.x = boardOrigin.x
-        //this.y = boardOrigin.y
         this.moveSpeed = .9 * windowDependentScaler
         this.radius = gameScaler * .01
         this.pathHistory = []
@@ -64,10 +62,8 @@ class Player {
     //draw the player on at the center of the board
     render() {
         this.health > 2 ? this.color = 'green' : this.health === 2 ? this.color = 'orange' : this.health < 2 ? this.color = 'red' : null
-        //console.log(this.pathHistory.length)
         //path history shadow, drawn first so player will overlay if on top.
         if (this.pathHistory.length > this.jumpBackDist / 2) {
-            //console.log('draw history')
             pencil.beginPath()
             this.jumpBackDist === this.pathHistory.length ? pencil.fillStyle = 'purple' : pencil.fillStyle = 'lightblue'
             pencil.arc(this.pathHistory[this.pathHistory.length - 1][0], this.pathHistory[this.pathHistory.length - 1][1], this.radius, 0, 2 * Math.PI)
@@ -94,7 +90,6 @@ class Player {
         if (this.detonationAnimationState > 0) {
             pencil.beginPath()
             this.healthDetonate === true ? pencil.fillStyle = 'red' : pencil.fillStyle = 'darkorange'
-
             pencil.arc(this.x, this.y, (this.detonateRadius / (this.detonationAnimationDuration / this.detonationAnimationState)), 0, 2 * Math.PI)
             pencil.fill()
             if (this.detonationAnimationState >= this.detonationAnimationDuration) {
@@ -115,19 +110,16 @@ class Player {
         //pick the time distance in seconds back, adjust for game tick/second, and revert state.
         if (this.pathHistory.length === this.jumpBackDist) {
             let historicState = this.pathHistory[this.jumpBackDist - 1]
-            //console.log(this.pathHistory)
-            //console.log(historicState)
             nextMove = [0, 0, 1]
             this.x = historicState[0]
             this.y = historicState[1]
             this.pathHistory = []
-            //console.log(this.x,this.y)
         }
     }
 
+    //detonate player ability
     detonate(bool) {
         if (this.detonateTimer === this.detonateCD || bool === true) {
-            //console.log(bool)
             checkCollisions(this.detonateRadius, 'Detonate')
             bool === true ? null : this.detonateTimer = 0
             this.detonationAnimationState = 1
@@ -146,25 +138,17 @@ class Spawn {
         this.y = 0
         this.color = color
         this.speed = speed
-        //console.log('My dX, dY is ' , this.dX,this.dY)
     }
 
     render() {
         pencil.fillStyle = this.color
         pencil.fillRect(this.x, this.y, this.radius, this.radius)
     }
-    redirect() {
-        //New movement direction construction
-    }
 }
 
 class GeneralSpawn extends Spawn {
     constructor(radius, dX, dY, color, speed) {
         super(radius, dX, dY, color, speed)
-        //this.noise = document.getElementById('sound')
-        //console.log(this.noise)
-
-        //this.color=`rgb(${Math.floor(Math.random()*255)}, ${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)})`
     }
     movement() {
         //Bounce off the walls and move across screen
@@ -172,15 +156,12 @@ class GeneralSpawn extends Spawn {
             null
         } else {
             this.dX *= (-1)
-            //this.noise.play()
         }
         this.x += this.dX;
-        //check y coords
         if ((this.y + this.dY + this.radius) <= myCanvas.height && (this.y + this.dY) >= 0) {
             null
         } else {
             this.dY *= (-1)
-            //this.noise.play()
         }
         this.y += this.dY;
     }
@@ -201,14 +182,11 @@ class TrackingSpawn extends Spawn {
         let trackDY = trackY / netTrackTime;
         if ((this.x + this.dX + this.radius) <= myCanvas.width && (this.x + this.dX) >= 0) {
         } else {
-            //console.log('player and this x,y', player.x, player.y, this.x, this.y, 'track then D', trackX, trackY, trackDX, trackDY)
             this.dX = trackDX
             this.dY = trackDY
         }
-        //check y coords
         if ((this.y + this.dY + this.radius) <= myCanvas.height && (this.y + this.dY) >= 0) {
         } else {
-            //console.log('player and this x,y', player.x, player.y, this.x, this.y, 'track then D', trackX, trackY, trackDX, trackDY)
             this.dY = trackDY
             this.dX = trackDX
         }
@@ -219,7 +197,6 @@ class TrackingSpawn extends Spawn {
 
 //generate new spawn dictated by rate, how much time has passed.
 function generateSpawn(rate, spawnSize, speedScaler, type) {
-    //console.log(spawnTimer)
     let size, speedX, speedY, newSpawn, spawnColor
     if (spawnTimer > rate) {
         spawnTimer = 0
@@ -228,7 +205,6 @@ function generateSpawn(rate, spawnSize, speedScaler, type) {
         if (gameSettings.mode === 'infinityMode') {
             if (type === TrackingSpawn) {
                 size = 5 * windowDependentScaler
-                //spawnColor = `rgb(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)},${Math.floor(Math.random() * 255)})`
                 gameSettings.difficulty === 'Fiesta' ? spawnColor = `rgb(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)},${Math.floor(Math.random() * 255)})` : spawnColor = 'red'
                 speedX = -1 * speedScaler * windowDependentScaler
                 speedY = -1 * speedScaler * windowDependentScaler
@@ -263,12 +239,9 @@ function generateSpawn(rate, spawnSize, speedScaler, type) {
         }
         //generate new spawn based off above gameMode construction logic
         newSpawn = new type(size, speedX, speedY, spawnColor, speedScaler * windowDependentScaler)
-        //console.log(newSpawn.radius)
-
         origins = [[0, 0], [myCanvas.width - newSpawn.radius, 0], [0, myCanvas.height - newSpawn.radius], [myCanvas.width - newSpawn.radius, myCanvas.height - newSpawn.radius]]
         newSpawn.x = origins[Math.floor(Math.random() * origins.length)][0]
         newSpawn.y = origins[Math.floor(Math.random() * origins.length)][1]
-
         spawnList.push(newSpawn)
     } else {
         spawnTimer++
@@ -284,7 +257,6 @@ function checkCollisions(radius, reason) {
     for (let spawn of spawnList) {
         //spawn hit box dimensions include player dimensions so that only player x and y coordinates need to be calculated after.
         let spawnHitBox = { xMin: spawn.x - radius, xMax: spawn.x + spawn.radius + radius, yMin: spawn.y - radius, yMax: spawn.y + spawn.radius + radius }
-        //console.log(spawnHitBox)
         if (player.x < spawnHitBox.xMax && player.x > spawnHitBox.xMin && player.y > spawnHitBox.yMin && player.y < spawnHitBox.yMax) {
             if (reason === 'Death') {
                 if (player.health === 1) {
@@ -310,13 +282,11 @@ function checkCollisions(radius, reason) {
                 tempKills.push(spawn)
             }
         } else {
-            //if spawns not in hitbox, add them to temp array to readd to spawnlist. Done so that spawn can be removed using checkcollisions function.
+            //if spawns not in hitbox, add them to temp array to re-add to spawnlist. Done so that spawn can be removed using checkcollisions function.
             tempSpawn.push(spawn)
         }
-        //console.log(scoreModifier)
-    }
+        }
     scoreModifier += ((tempKills.length ** 2) / 100)
-    //console.log(scoreModifier, tempKills.length)
     spawnList = tempSpawn
     if (activateHealthDetonate === true) {
         player.detonate(true)
@@ -357,22 +327,18 @@ let scoreBoardMultiplier = document.getElementById('scoreboard-multiplier')
 function updateScoreboard() {
     score += ((spawnList.length + spawnKills.length) / 50) * scoreModifier
     scoreBoard.textContent = `Score: ${Math.floor(score)}`
-    //console.log(scoreModifier)
     scoreBoardMultiplier.textContent = `Multiplier: ${(Math.round(scoreModifier * 100) / 100).toFixed(2)}`
-
-    //add killed spawn somewhere in score
 }
 
 //Function to advance the game by one 'tick' each 60ms.
 let spawnTimer = 0
 let aliveTime = 0
 let spawnRateScaler = 1
-//let tSpawn = new TrackingSpawn(10, 0.5, 0.5, .5)
-//spawnList.push(tSpawn)
 function gameTick() {
+
+    updateScoreboard()
     //clear board and redraw
     pencil.clearRect(0, 0, myCanvas.width, myCanvas.height)
-    updateScoreboard()
     player.movement()
     player.render()
     checkCollisions(player.radius, 'Death')
@@ -380,7 +346,6 @@ function gameTick() {
     aliveTime++
     //spawn stuff
     spawnRateScaler = Math.round(spawnRateScaler * 1000) / 1000
-    //console.log(spawnRateScaler)
     let spawnLogic
     let randomSpawn = [GeneralSpawn, TrackingSpawn]
     if (spawnList.length < 2000) {
@@ -411,7 +376,6 @@ let nextMove = [0, 0, 1]
 //function to handle movement. Data is pushed by Player class. Can handle other keypressse
 let keysDown = {}
 function movementHandlerKeyDown(e) {
-    //console.log('keyboard move was ', e.key)
     switch (e.key) {
         case "ArrowUp":
             nextMove[0] = 'y'
@@ -458,7 +422,6 @@ function movementHandlerKeyDown(e) {
 
 //modify movement based on held keys
 function movementHandlerKeyUp(e) {
-    //console.log(e.key)
     switch (e.key) {
         case 'Shift':
             nextMove[2] = 1
@@ -467,8 +430,6 @@ function movementHandlerKeyUp(e) {
 
 //Handle buttonclicks
 function settingClick(e) {
-    //console.log('in settings')
-    //console.log(e)
     let wasReal = false
     let rosettaSettings = {
         challengeMode: "Challenge Mode",
@@ -523,6 +484,7 @@ function settingClick(e) {
     }
 }
 
+//start of the game logic for a player to move around
 function gameIntro() {
 
     introInterval = setInterval(() => {
@@ -531,6 +493,8 @@ function gameIntro() {
         player.render()
     }, 20)
 }
+
+//Newly added function to shade the screen after death/ unshade on reset
 const shader = (bool) => {
     let shader = document.getElementById('shader')
     console.log('shading')
@@ -556,12 +520,11 @@ const shader = (bool) => {
         }, 10)
     }
 }
+
+//functino to create all the effects after a player runs out of health
 const postgameElements = document.getElementById('postgame-positioner')
 let postgameMovement
 function youDied() {
-    //Message displayed over screen
-    //Scores and/or other metrics displayed below
-    //Hit 'r' to reset, or click button for next game mode.
     shader(true)
     console.log(`You killed ${spawnKills.length} squares. Nice! Total time survived: ${aliveTime / 50} seconds!`)
     postgameElements.style.display = 'block'
@@ -578,9 +541,7 @@ function youDied() {
     const squareMovements = () => {
         pencil.clearRect(0, 0, myCanvas.width, myCanvas.height)
         player.render()
-
         spawnRateScaler = 1
-        //console.log(spawnRateScaler)
         let spawnLogic
         let randomSpawn = [GeneralSpawn, TrackingSpawn]
         if (spawnList.length < 2000) {
@@ -606,7 +567,6 @@ function youDied() {
         }
     }
     postgameMovement = setInterval(squareMovements, 20)
-
 }
 
 //event listeners for keyboard presses and clicks
@@ -616,8 +576,7 @@ document.getElementById('scoreboard-container').addEventListener('click', settin
 )
 
 //resetGame also starts the game by setting the interval.
-let gameSettings = { mode: 'introMode', difficulty: 'Easy' }
+let gameSettings = { mode: 'introMode', difficulty: 'Hard' }
 let player = new Player()
 let introInterval, gameInterval
 gameIntro()
-//setInterval(gameTick, 20)
