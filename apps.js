@@ -295,6 +295,7 @@ function checkCollisions(radius, reason) {
                     spawn.dY = 0
                     spawn.speed = 0
                     youDied()
+                    return
                 } else {
                     player.health--
                     activateHealthDetonate = true
@@ -371,10 +372,11 @@ let spawnRateScaler = 1
 function gameTick() {
     //clear board and redraw
     pencil.clearRect(0, 0, myCanvas.width, myCanvas.height)
+    updateScoreboard()
     player.movement()
     player.render()
     checkCollisions(player.radius, 'Death')
-    updateScoreboard()
+
     aliveTime++
     //spawn stuff
     spawnRateScaler = Math.round(spawnRateScaler * 1000) / 1000
