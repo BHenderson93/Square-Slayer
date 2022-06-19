@@ -75,8 +75,8 @@ font-family: 'Metal Mania', cursive;
     top:5vh;
     height:90vh;
     width:75vw;
-    background: radial-gradient(farthest-side at center, transparent, rgba(0,0,0,.6) 20%, black 65%);
     opacity:0;
+    background: radial-gradient(farthest-side at center, rgba(0,0,0,.6), black 75% );
 }
 
 .shader2{

@@ -411,7 +411,7 @@ let nextMove = [0, 0, 1]
 //function to handle movement. Data is pushed by Player class. Can handle other keypressse
 let keysDown = {}
 function movementHandlerKeyDown(e) {
-    console.log('keyboard move was ', e.key)
+    //console.log('keyboard move was ', e.key)
     switch (e.key) {
         case "ArrowUp":
             nextMove[0] = 'y'
@@ -533,6 +533,7 @@ function gameIntro() {
 }
 const shader = (bool) => {
     let shader = document.getElementById('shader')
+    console.log('shading')
     if (bool) {
         let index = 0
         let effect = setInterval(() => {
