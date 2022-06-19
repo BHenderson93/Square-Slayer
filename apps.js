@@ -1,4 +1,4 @@
-//console.log('apps.js synced')
+console.log('apps.js synced')
 
 let myCanvas = document.getElementById('gameboard')
 let pencil = myCanvas.getContext('2d')
@@ -9,6 +9,8 @@ const windowDependentScaler = screenScaleInfo / 300
 //x and y coordinates for center of the board, as well as gameScalers for screen sizes
 const boardOrigin = { x: myCanvas.width / 2, y: myCanvas.height / 2 }
 const gameScaler = Math.min(myCanvas.width, myCanvas.height)
+
+
 
 //Class specifics for Player
 class Player {
@@ -24,7 +26,7 @@ class Player {
         this.y = boardOrigin.y
         //this.x = boardOrigin.x
         //this.y = boardOrigin.y
-        this.moveSpeed = .7 * windowDependentScaler
+        this.moveSpeed = .9 * windowDependentScaler
         this.radius = gameScaler * .01
         this.pathHistory = []
         gameSettings.difficulty === 'Fiesta' ? this.jumpBackDist = 150 : this.jumpBackDist = 250
@@ -34,6 +36,7 @@ class Player {
         this.detonateRadius = this.radius * 20
         this.detonationAnimationDuration = 12
         this.detonationAnimationState = 0
+        this.dead = false
 
     }
 
@@ -44,11 +47,11 @@ class Player {
         let moveDist = nextMove[1] * nextMove[2] * this.moveSpeed
         moveAxis === 'x' ? (this.x + moveDist >= 0 && this.x + moveDist <= myCanvas.width ? this.x += moveDist : null) : null
         moveAxis === 'y' ? (this.y + moveDist >= 0 && this.y + moveDist <= myCanvas.height ? this.y += moveDist : null) : null
-        this.pathHistory.unshift([this.x, this.y])
+        gameSettings.mode === 'zenMode' ? null : this.pathHistory.unshift([this.x, this.y])
         this.pathHistory.length > this.jumpBackDist ? this.pathHistory.pop() : null
 
         //also add 1 to detonate timer for it's cooldown
-        this.detonateTimer < this.detonateCD ? this.detonateTimer += 1 : null
+        gameSettings.mode === 'zenMode' ? null : this.detonateTimer < this.detonateCD ? this.detonateTimer += 1 : null
         this.detonationAnimationState > 0 ? this.detonationAnimationState++ : null
 
         //add 1 to regen timer to give player health back.
@@ -288,7 +291,11 @@ function checkCollisions(radius, reason) {
                     console.log(`You've been hit!`)
                     clearInterval(gameInterval)
                     tempSpawn.push(spawn)
+                    spawn.dX = 0
+                    spawn.dY = 0
+                    spawn.speed = 0
                     youDied()
+                    return
                 } else {
                     player.health--
                     activateHealthDetonate = true
@@ -319,7 +326,10 @@ function checkCollisions(radius, reason) {
 
 //function to reset the game
 function resetGame() {
+    shader(false)
+    player.dead = false
     postgameElements.style.display = 'none';
+    clearInterval(postgameMovement)
     clearInterval(gameInterval)
     clearInterval(introInterval)
     player = new Player()
@@ -362,10 +372,11 @@ let spawnRateScaler = 1
 function gameTick() {
     //clear board and redraw
     pencil.clearRect(0, 0, myCanvas.width, myCanvas.height)
+    updateScoreboard()
     player.movement()
     player.render()
     checkCollisions(player.radius, 'Death')
-    updateScoreboard()
+
     aliveTime++
     //spawn stuff
     spawnRateScaler = Math.round(spawnRateScaler * 1000) / 1000
@@ -398,6 +409,7 @@ function gameTick() {
 //store the last arrowkey press in the nextMove array. Use that for movement direction. Spacebar to clear. format [axis, direction, speed]
 let nextMove = [0, 0, 1]
 //function to handle movement. Data is pushed by Player class. Can handle other keypressse
+let keysDown = {}
 function movementHandlerKeyDown(e) {
     //console.log('keyboard move was ', e.key)
     switch (e.key) {
@@ -421,15 +433,24 @@ function movementHandlerKeyDown(e) {
             nextMove = [0, 0, 1]
             break
         case "f":
-            gameSettings.mode === 'zenMode' ? null : player.jumpBack()
+            player.dead === true ? null : gameSettings.mode === 'zenMode' ? null : player.jumpBack()
+            break
+        case "F":
+            player.dead === true ? null : gameSettings.mode === 'zenMode' ? null : player.jumpBack()
             break
         case "d":
-            gameSettings.mode === 'zenMode' ? null : player.detonate(false)
+            player.dead === true ? null : gameSettings.mode === 'zenMode' ? null : player.detonate(false)
+            break
+        case "D":
+            player.dead === true ? null : gameSettings.mode === 'zenMode' ? null : player.detonate(false)
             break
         case 'Shift':
-            nextMove[2] = 0.3
+            nextMove[2] = 0.4
             break
         case 'r':
+            resetGame()
+            break
+        case 'R':
             resetGame()
             break
     }
@@ -510,16 +531,82 @@ function gameIntro() {
         player.render()
     }, 20)
 }
+const shader = (bool) => {
+    let shader = document.getElementById('shader')
+    console.log('shading')
+    if (bool) {
+        let index = 0
+        let effect = setInterval(() => {
+            shader.style.opacity = index / 100
+            index++
+            if (index === 98) {
+                clearInterval(effect)
+                return
+            }
+        }, 10)
+    } else {
+        let index = 98
+        let effect = setInterval(() => {
+            shader.style.opacity = index / 100
+            index--
+            if (index === 0) {
+                clearInterval(effect)
+                return
+            }
+        }, 10)
+    }
+}
 const postgameElements = document.getElementById('postgame-positioner')
+let postgameMovement
 function youDied() {
     //Message displayed over screen
     //Scores and/or other metrics displayed below
     //Hit 'r' to reset, or click button for next game mode.
+    shader(true)
     console.log(`You killed ${spawnKills.length} squares. Nice! Total time survived: ${aliveTime / 50} seconds!`)
     postgameElements.style.display = 'block'
     document.getElementById('li-score').textContent = `Score: ${Math.floor(score)}`
     document.getElementById('li-slain').textContent = `Squares Slain: ${spawnKills.length}`
     document.getElementById('li-time').textContent = `Time Alive: ${Math.round(Math.floor(aliveTime / 50))} seconds`
+    player.dead = true
+    for (let spawn of spawnList) {
+        spawn.speed = spawn.speed * 0.3
+        spawn.dX = spawn.dX * 0.3
+        spawn.dY = spawn.dY * 0.3
+    }
+
+    const squareMovements = () => {
+        pencil.clearRect(0, 0, myCanvas.width, myCanvas.height)
+        player.render()
+
+        spawnRateScaler = 1
+        //console.log(spawnRateScaler)
+        let spawnLogic
+        let randomSpawn = [GeneralSpawn, TrackingSpawn]
+        if (spawnList.length < 2000) {
+            switch (gameSettings.difficulty) {
+                case "Easy":
+                    spawnLogic = [200 / spawnRateScaler, 15, 0.3, randomSpawn[0]]
+                    break
+                case "Medium":
+                    spawnLogic = [125 / spawnRateScaler, 15, .3 + (spawnRateScaler / 4), randomSpawn[Math.floor(Math.random() * 2)]]
+                    break
+                case "Hard":
+                    spawnLogic = [50 / spawnRateScaler, 15, 0.5 + (spawnRateScaler / 4), randomSpawn[Math.floor(Math.random() * 2)]]
+                    break
+                case "Fiesta":
+                    spawnLogic = [10 / spawnRateScaler, 5, .5 + (spawnRateScaler / 4), randomSpawn[Math.floor(Math.random() * 2)]]
+                    break
+            }
+            generateSpawn(spawnLogic[0], spawnLogic[1], spawnLogic[2] * .3, spawnLogic[3])
+        }
+        for (let spawn of spawnList) {
+            spawn.movement()
+            spawn.render()
+        }
+    }
+    postgameMovement = setInterval(squareMovements, 20)
+
 }
 
 //event listeners for keyboard presses and clicks
