@@ -1,5 +1,3 @@
-console.log('apps.js synced')
-
 //Screen scaling and canvas variables
 let myCanvas = document.getElementById('gameboard')
 let pencil = myCanvas.getContext('2d')
