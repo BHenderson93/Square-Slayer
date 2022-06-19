@@ -526,13 +526,13 @@ const shader = (bool) =>{
         let effect = setInterval(()=>{
             shader.style.opacity = index/100
             index++
-            if(index === 50){
+            if(index === 98){
                 clearInterval(effect)
                 return
             }
-        } , 20)
+        } , 10)
     }else{
-        let index = 50
+        let index = 98
         let effect = setInterval(()=>{
             shader.style.opacity = index/100
             index--
@@ -540,7 +540,7 @@ const shader = (bool) =>{
                 clearInterval(effect)
                 return
             }
-        } , 20)
+        } , 10)
     }
 }
 const postgameElements = document.getElementById('postgame-positioner')

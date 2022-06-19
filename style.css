@@ -73,7 +73,7 @@ font-family: 'Metal Mania', cursive;
     top:5vh;
     height:90vh;
     width:75vw;
-    background: rgba(0,0,0);
+    background: radial-gradient(20vh at center, transparent, black);
     opacity:0;
 }
 
@@ -116,6 +116,7 @@ font-family: 'Metal Mania', cursive;
     left: 2.5vw;
     width: 75vw;
     height: 90vh;
+    color:red;
 }
 #postgame-wrapper{
     width:100%;
