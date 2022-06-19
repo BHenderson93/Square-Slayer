@@ -67,6 +67,16 @@ font-family: 'Metal Mania', cursive;
     margin:3vh;
 }
 
+.shader{
+    position:fixed;
+    left:2.5vw;
+    top:5vh;
+    height:90vh;
+    width:75vw;
+    background: rgba(0,0,0);
+    opacity:0;
+}
+
 #intro-wrapper {
     position: fixed;
     display:block;

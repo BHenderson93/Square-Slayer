@@ -10,6 +10,8 @@ const windowDependentScaler = screenScaleInfo / 300
 const boardOrigin = { x: myCanvas.width / 2, y: myCanvas.height / 2 }
 const gameScaler = Math.min(myCanvas.width, myCanvas.height)
 
+
+
 //Class specifics for Player
 class Player {
 
@@ -323,6 +325,7 @@ function checkCollisions(radius, reason) {
 
 //function to reset the game
 function resetGame() {
+    shader(false)
     player.dead = false
     postgameElements.style.display = 'none';
     clearInterval(postgameMovement)
@@ -516,12 +519,37 @@ function gameIntro() {
         player.render()
     }, 20)
 }
+const shader = (bool) =>{
+    let shader = document.getElementById('shader')
+    if(bool) {
+        let index = 0
+        let effect = setInterval(()=>{
+            shader.style.opacity = index/100
+            index++
+            if(index === 50){
+                clearInterval(effect)
+                return
+            }
+        } , 20)
+    }else{
+        let index = 50
+        let effect = setInterval(()=>{
+            shader.style.opacity = index/100
+            index--
+            if(index === 0){
+                clearInterval(effect)
+                return
+            }
+        } , 20)
+    }
+}
 const postgameElements = document.getElementById('postgame-positioner')
 let postgameMovement
 function youDied() {
     //Message displayed over screen
     //Scores and/or other metrics displayed below
     //Hit 'r' to reset, or click button for next game mode.
+    shader(true)
     console.log(`You killed ${spawnKills.length} squares. Nice! Total time survived: ${aliveTime / 50} seconds!`)
     postgameElements.style.display = 'block'
     document.getElementById('li-score').textContent = `Score: ${Math.floor(score)}`
