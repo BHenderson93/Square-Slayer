@@ -45,11 +45,11 @@ class Player {
         let moveDist = nextMove[1] * nextMove[2] * this.moveSpeed
         moveAxis === 'x' ? (this.x + moveDist >= 0 && this.x + moveDist <= myCanvas.width ? this.x += moveDist : null) : null
         moveAxis === 'y' ? (this.y + moveDist >= 0 && this.y + moveDist <= myCanvas.height ? this.y += moveDist : null) : null
-        this.pathHistory.unshift([this.x, this.y])
+        gameSettings.mode === 'zenMode' ? null : this.pathHistory.unshift([this.x, this.y])
         this.pathHistory.length > this.jumpBackDist ? this.pathHistory.pop() : null
 
         //also add 1 to detonate timer for it's cooldown
-        this.detonateTimer < this.detonateCD ? this.detonateTimer += 1 : null
+        gameSettings.mode === 'zenMode' ? null : this.detonateTimer < this.detonateCD ? this.detonateTimer += 1 : null
         this.detonationAnimationState > 0 ? this.detonationAnimationState++ : null
 
         //add 1 to regen timer to give player health back.
