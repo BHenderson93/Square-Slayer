@@ -1,7 +1,4 @@
-@font-face{
-    font-family: "Brutal";
-    src: url("brutalworld-font/Brutalworld-owxEa.ttf") ;
-}
+@import url('https://fonts.googleapis.com/css2?family=Metal+Mania&display=swap');
 body {
     width: 100vw;
     height: 100vh;
@@ -9,6 +6,8 @@ body {
     margin: 0;
     justify-content: center;
     align-items: center;
+    color:red;
+    background-color: black;
 }
 div{
     margin:0;
@@ -57,8 +56,8 @@ button {
     height: 100%;
     font-size: 2.5vh;
 }
-span{
-
+span {
+font-family: 'Metal Mania', cursive;
 }
 
 .intro {
@@ -68,6 +67,25 @@ span{
 .stat{
     font-size: 8vh;
     margin:3vh;
+}
+
+.shader{
+    position:fixed;
+    left:2.5vw;
+    top:5vh;
+    height:90vh;
+    width:75vw;
+    opacity:0;
+    background: radial-gradient(farthest-side at center, rgba(0,0,0,.6), black 75% );
+}
+
+.shader2{
+    position:fixed;
+    left:2.5vw;
+    top:5vh;
+    height:90vh;
+    width:75vw;
+    background: radial-gradient(farthest-side at center, transparent, rgba(0,0,0,.6) 70%, black 90% );
 }
 
 #intro-wrapper {
@@ -83,23 +101,25 @@ span{
     position: absolute;
     width:100%;
     left: 50%;
-    top: 10%;
+    top: 15%;
     transform: translate(-50%, -50%);
     font-size: 4vh;
 }
 
 #instructions-left {
     position: absolute;
-    left: 5%;
+    left: 10%;
     top: 25%;
-    width: 40%
+    width: 40%;
+    height: 60%;
 }
 
 #instructions-right {
     position: absolute;
-    right: 5%;
+    right: 10%;
     top: 25%;
     width: 40%;
+    height:60%
 }
 #postgame-positioner {
     position: fixed;
@@ -109,6 +129,8 @@ span{
     left: 2.5vw;
     width: 75vw;
     height: 90vh;
+    opacity:90%;
+    color:red;
 }
 #postgame-wrapper{
     width:100%;
@@ -123,6 +145,7 @@ span{
     display:block;
     width:100%;
     font-size: 8vh;
+    font-family: 'Metal Mania', cursive;
 }
 
 #scoreboard-container {
@@ -133,6 +156,7 @@ span{
     justify-content: space-evenly;
     align-items: top;
     gap: space-around;
+    opacity:70%;
 }
 #scoreboard-sub{
 margin-bottom: 3vh;
@@ -147,7 +171,7 @@ margin-bottom: 3vh;
     text-align: center;
 }
 #brutal{
-    font-family: "Brutal" , "Arial" , sans-serif;
+    font-family: 'Metal Mania', cursive;
     font-size: 13vh;
 }
 #press-r{
