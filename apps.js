@@ -409,8 +409,9 @@ function gameTick() {
 //store the last arrowkey press in the nextMove array. Use that for movement direction. Spacebar to clear. format [axis, direction, speed]
 let nextMove = [0, 0, 1]
 //function to handle movement. Data is pushed by Player class. Can handle other keypressse
+let keysDown = {}
 function movementHandlerKeyDown(e) {
-    //console.log('keyboard move was ', e.key)
+    console.log('keyboard move was ', e.key)
     switch (e.key) {
         case "ArrowUp":
             nextMove[0] = 'y'
@@ -434,13 +435,22 @@ function movementHandlerKeyDown(e) {
         case "f":
             player.dead === true ? null : gameSettings.mode === 'zenMode' ? null : player.jumpBack()
             break
+        case "F":
+            player.dead === true ? null : gameSettings.mode === 'zenMode' ? null : player.jumpBack()
+            break
         case "d":
+            player.dead === true ? null : gameSettings.mode === 'zenMode' ? null : player.detonate(false)
+            break
+        case "D":
             player.dead === true ? null : gameSettings.mode === 'zenMode' ? null : player.detonate(false)
             break
         case 'Shift':
             nextMove[2] = 0.4
             break
         case 'r':
+            resetGame()
+            break
+        case 'R':
             resetGame()
             break
     }
@@ -521,28 +531,28 @@ function gameIntro() {
         player.render()
     }, 20)
 }
-const shader = (bool) =>{
+const shader = (bool) => {
     let shader = document.getElementById('shader')
-    if(bool) {
+    if (bool) {
         let index = 0
-        let effect = setInterval(()=>{
-            shader.style.opacity = index/100
+        let effect = setInterval(() => {
+            shader.style.opacity = index / 100
             index++
-            if(index === 98){
+            if (index === 98) {
                 clearInterval(effect)
                 return
             }
-        } , 10)
-    }else{
+        }, 10)
+    } else {
         let index = 98
-        let effect = setInterval(()=>{
-            shader.style.opacity = index/100
+        let effect = setInterval(() => {
+            shader.style.opacity = index / 100
             index--
-            if(index === 0){
+            if (index === 0) {
                 clearInterval(effect)
                 return
             }
-        } , 10)
+        }, 10)
     }
 }
 const postgameElements = document.getElementById('postgame-positioner')
@@ -559,15 +569,15 @@ function youDied() {
     document.getElementById('li-time').textContent = `Time Alive: ${Math.round(Math.floor(aliveTime / 50))} seconds`
     player.dead = true
     for (let spawn of spawnList) {
-        spawn.speed=spawn.speed*0.3
-        spawn.dX = spawn.dX*0.3
-        spawn.dY=spawn.dY*0.3
+        spawn.speed = spawn.speed * 0.3
+        spawn.dX = spawn.dX * 0.3
+        spawn.dY = spawn.dY * 0.3
     }
 
-    const squareMovements=()=>{
+    const squareMovements = () => {
         pencil.clearRect(0, 0, myCanvas.width, myCanvas.height)
         player.render()
-        
+
         spawnRateScaler = 1
         //console.log(spawnRateScaler)
         let spawnLogic
@@ -587,14 +597,14 @@ function youDied() {
                     spawnLogic = [10 / spawnRateScaler, 5, .5 + (spawnRateScaler / 4), randomSpawn[Math.floor(Math.random() * 2)]]
                     break
             }
-            generateSpawn(spawnLogic[0], spawnLogic[1], spawnLogic[2]*.3, spawnLogic[3])
+            generateSpawn(spawnLogic[0], spawnLogic[1], spawnLogic[2] * .3, spawnLogic[3])
         }
         for (let spawn of spawnList) {
             spawn.movement()
             spawn.render()
         }
     }
-    postgameMovement = setInterval(squareMovements , 20)
+    postgameMovement = setInterval(squareMovements, 20)
 
 }
 
